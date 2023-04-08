@@ -23,9 +23,9 @@ async function init() {
 	);
 
 	if (import.meta.env.DEV) {
-		console.info(`%c🐰 Starting Directus v${version}...`, 'color:Green');
+		console.info(`%c🐰 Starting Quantum Directus v${version}...`, 'color:Green');
 	} else {
-		console.info(`%c🐰 Starting Directus...`, 'color:Green');
+		console.info(`%c🐰 Starting Quantum Directus...`, 'color:Green');
 	}
 
 	console.time('🕓 Application Loaded');
