@@ -16,6 +16,8 @@
 
 		<router-view v-else-if="!hydrating" />
 
+		<v-rendszeruzenetek />
+
 		<teleport to="#custom-css">{{ customCSS }}</teleport>
 	</div>
 </template>
