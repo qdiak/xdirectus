@@ -21,6 +21,7 @@ import { useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import _ from 'lodash';
 import { AxiosResponse } from 'axios';
+import { refresh } from '../auth';
 
 export default defineComponent({
 	setup() {
@@ -81,8 +82,15 @@ export default defineComponent({
 				}
 				errorCount = 0;
 			} catch (err) {
+				if (_.get(err, 'response.status') === 401) {
+					try {
+						await refresh();
+					} catch (refreshErr) {
+						// console.error(refreshErr);
+					}
+				}
 				errorCount++;
-				console.error(err);
+				// console.error(err);
 			}
 			await sleep(POLL_TIMEOUT);
 			if (!longPollingDisabled && errorCount < 5) {
@@ -103,7 +111,7 @@ export default defineComponent({
 					router.push(currentRendszeruzenet.value.gomb_link);
 				}
 			} catch (err) {
-				console.error(err);
+				// console.error(err);
 			}
 			// close the dialogue
 			// the message will come up again anyway if the update is not successful
