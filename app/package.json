@@ -1,14 +1,14 @@
 {
-	"name": "@directus/app",
-	"version": "9.24.0",
-	"description": "App dashboard for Directus",
+	"name": "au_directus_app",
+	"version": "1.0.8",
+	"description": "Directus App v9.24.0",
 	"homepage": "https://directus.io",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/directus/directus.git",
+		"url": "https://github.com/qdiak/directus.git",
 		"directory": "app"
 	},
-	"funding": "https://github.com/directus/directus?sponsor=1",
+	"funding": "https://github.com/qdiak/directus?sponsor=1",
 	"author": "Rijk van Zanten <rijkvanzanten@me.com>",
 	"exports": {
 		".": "./dist/index.html",

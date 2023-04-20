@@ -1,6 +1,6 @@
 {
 	"name": "au_directus",
-	"version": "1.0.6",
+	"version": "1.0.8",
 	"description": "Directus v9.24.0",
 	"keywords": [
 		"directus",
@@ -27,10 +27,10 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/directus/directus.git",
+		"url": "https://github.com/qdiak/directus.git",
 		"directory": "api"
 	},
-	"funding": "https://github.com/directus/directus?sponsor=1",
+	"funding": "https://github.com/qdiak/directus?sponsor=1",
 	"license": "GPL-3.0-only",
 	"author": {
 		"name": "Monospace Inc",
@@ -75,7 +75,7 @@
 	"dependencies": {
 		"@authenio/samlify-node-xmllint": "2.0.0",
 		"@aws-sdk/client-ses": "3.292.0",
-		"@directus/app": "workspace:*",
+		"au_directus_app": "workspace:*",
 		"@directus/extensions-sdk": "workspace:*",
 		"@directus/format-title": "9.15.0",
 		"@directus/schema": "workspace:*",

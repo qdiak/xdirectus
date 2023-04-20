@@ -103,7 +103,7 @@ importers:
       '@aws-sdk/client-ses':
         specifier: 3.292.0
         version: 3.292.0
-      '@directus/app':
+      'au_directus_app':
         specifier: workspace:*
         version: link:../app
       '@directus/extensions-sdk':
