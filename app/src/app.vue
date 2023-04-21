@@ -32,7 +32,7 @@ import { startIdleTracking, stopIdleTracking } from './idle';
 import { useSystem } from '@/composables/use-system';
 
 import { setFavicon } from '@/utils/set-favicon';
-import { User } from '@directus/shared/types';
+import { User } from '@directus/types';
 
 export default defineComponent({
 	setup() {
@@ -71,6 +71,7 @@ export default defineComponent({
 
 				if (theme) {
 					document.body.classList.add(theme);
+
 					document
 						.querySelector('head meta[name="theme-color"]')
 						?.setAttribute('content', theme === 'light' ? '#ffffff' : '#263238');

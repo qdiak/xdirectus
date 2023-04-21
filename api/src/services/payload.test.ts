@@ -1,7 +1,8 @@
-import knex, { Knex } from 'knex';
+import knex from 'knex';
+import type { Knex } from 'knex';
 import { MockClient, Tracker, createTracker } from 'knex-mock-client';
-import { PayloadService } from '../../src/services';
-import { getHelpers, Helpers } from '../../src/database/helpers';
+import { PayloadService } from '../../src/services/index.js';
+import { getHelpers, Helpers } from '../../src/database/helpers/index.js';
 import { describe, beforeAll, afterEach, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
 
 vi.mock('../../src/database/index', () => ({
@@ -13,7 +14,7 @@ describe('Integration Tests', () => {
 	let tracker: Tracker;
 
 	beforeAll(async () => {
-		db = vi.mocked(knex({ client: MockClient }));
+		db = vi.mocked(knex.default({ client: MockClient }));
 		tracker = createTracker(db);
 	});
 
@@ -31,6 +32,7 @@ describe('Integration Tests', () => {
 					knex: db,
 					schema: { collections: {}, relations: [] },
 				});
+
 				helpers = getHelpers(db);
 			});
 
@@ -218,6 +220,7 @@ describe('Integration Tests', () => {
 						],
 						'read'
 					);
+
 					expect(result).toMatchObject([
 						{
 							[dateFieldId]: '2022-01-10',
