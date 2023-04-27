@@ -54,12 +54,19 @@ pnpm --filter au_directus_app build && pnpm --filter au_directus_api dev
 
 > There is no watch mode for the app, so it should be rerunned after every app changes.
 
+#### Update quantum dependency manually
+```
+cp -a app/dist ../quantum_ugyvitel/node_modules/au_directus_app && \
+cp -a api/dist ../quantum_ugyvitel/node_modules/au_directus_api
+```
+
 ## Publishing the npm package
 
-### 1. Increase the version numbers
+### 1. Increase version
 
-`api/package.json` -> `version`
-`app/package.json` -> `version`
+1. `package.json` -> `{ "version': "1.0.x", [...] }`
+1. `api/package.json` -> `{ "version': "1.0.x", [...] }`
+1. `app/package.json` -> `{ "version': "1.0.x", [...] }`
 
 ### 2. Build & publish
 

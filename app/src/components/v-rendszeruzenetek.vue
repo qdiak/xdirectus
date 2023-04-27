@@ -44,14 +44,15 @@ export default defineComponent({
 			};
 		};
 
-		_.set(window, '_test_rendszeruzenet', async (msg: string) => {
+		_.set(window, '_test_rendszeruzenet', async (msg: string, overrideDefault: any) => {
 			await api.post('/items/rendszeruzenet', {
 				targy: 'Teszt',
 				uzenet: msg,
 				tipus: 'info',
 				gomb_szoveg: 'OK',
-				gomb_link: '/admin/content/dolgozo',
+				gomb_link: '/content/dolgozo',
 				olvasott: false,
+				...overrideDefault,
 			});
 		});
 
@@ -70,9 +71,11 @@ export default defineComponent({
 				if (appStore.authenticated && !currentRendszeruzenet.value) {
 					// console.log('poll...');
 					const result = (await api.get<any, AxiosResponse<RendszeruzenetResponse>>('/rendszeruzenet')).data.data;
+
 					if (result.longPolling === false) {
 						longPollingDisabled = true;
 					}
+
 					if (result.items.length) {
 						currentRendszeruzenet.value = result.items[0]; // TODO return only one!
 					}
@@ -80,6 +83,7 @@ export default defineComponent({
 					// wait...
 					// console.log('wait...');
 				}
+
 				errorCount = 0;
 			} catch (err) {
 				if (_.get(err, 'response.status') === 401) {
@@ -89,30 +93,37 @@ export default defineComponent({
 						// console.error(refreshErr);
 					}
 				}
+
 				errorCount++;
 				// console.error(err);
 			}
+
 			await sleep(POLL_TIMEOUT);
+
 			if (!longPollingDisabled && errorCount < 5) {
 				void checkMessages();
 			}
 		}
+
 		void checkMessages();
 
 		async function approve() {
 			if (approving.value) {
 				return;
 			}
-			// console.debug('approve...');
+
 			try {
 				approving.value = true;
 				await api.patch('/items/rendszeruzenet/' + currentRendszeruzenet.value?.id, { olvasott: true });
-				if (currentRendszeruzenet.value?.gomb_link) {
-					router.push(currentRendszeruzenet.value.gomb_link);
+				const link = currentRendszeruzenet.value?.gomb_link;
+
+				if (link && link.length) {
+					router.push(link);
 				}
 			} catch (err) {
 				// console.error(err);
 			}
+
 			// close the dialogue
 			// the message will come up again anyway if the update is not successful
 			currentRendszeruzenet.value = null;

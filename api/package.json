@@ -1,6 +1,6 @@
 {
 	"name": "au_directus_api",
-	"version": "1.0.11",
+	"version": "1.0.12",
 	"description": "Directus API v9.25.2",
 	"type": "module",
 	"keywords": [
