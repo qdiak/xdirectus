@@ -43,13 +43,13 @@ set -o allexport; source api/.env; set +o allexport
 ### 4. Initialize dabatase
 
 ```
-pnpm --filter au_directus cli bootstrap
+pnpm --filter au_directus_api cli bootstrap
 ```
 
 ### 5. Build app, and run the api
 
 ```
-pnpm --filter au_directus_app build && pnpm --filter au_directus dev
+pnpm --filter au_directus_app build && pnpm --filter au_directus_api dev
 ```
 
 > There is no watch mode for the app, so it should be rerunned after every app changes.
@@ -68,5 +68,9 @@ pnpm --filter au_directus_app build && pnpm --filter au_directus dev
 ```
 pnpm -r build && \
 NODE_AUTH_TOKEN=[...] \
-pnpm --filter au_directus --filter au_directus_app publish --access=public --no-git-checks
+pnpm \
+--filter au_directus_app \
+--filter au_directus_api \
+--filter au_directus \
+publish --access=public --no-git-checks
 ```

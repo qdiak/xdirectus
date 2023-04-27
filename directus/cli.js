@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-import '@directus/api/cli/run.js';
+import 'au_directus_api/cli/run.js';

@@ -1,6 +1,6 @@
 {
 	"name": "au_directus_app",
-	"version": "1.0.9",
+	"version": "1.0.11",
 	"description": "Directus App v9.25.2",
 	"homepage": "https://directus.io",
 	"type": "module",
