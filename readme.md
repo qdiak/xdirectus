@@ -40,13 +40,19 @@ ADMIN_PASSWORD="password"
 set -o allexport; source api/.env; set +o allexport
 ```
 
-### 4. Initialize dabatase
+### 4. Use the right npm version
+
+```
+nvm use
+```
+
+### 5. Initialize dabatase
 
 ```
 pnpm --filter au_directus_api cli bootstrap
 ```
 
-### 5. Build app, and run the api
+### 6. Build app, and run the api
 
 ```
 pnpm --filter au_directus_app build && pnpm --filter au_directus_api dev
