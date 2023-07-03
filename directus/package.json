@@ -1,6 +1,6 @@
 {
-	"name": "au_directus",
-	"version": "10.3.0",
+	"name": "quantum_directus",
+	"version": "10.3.3",
 	"description": "Directus v10.3.0",
 	"keywords": [
 		"directus",
@@ -53,7 +53,7 @@
 		"directus": "cli.js"
 	},
 	"dependencies": {
-		"au_directus_api": "workspace:*",
+		"quantum_directus_api": "workspace:*",
 		"@directus/update-check": "workspace:*"
 	},
 	"engines": {

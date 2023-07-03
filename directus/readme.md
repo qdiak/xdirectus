@@ -55,21 +55,21 @@ pnpm i
 ### 5. Initialize dabatase
 
 ```
-pnpm --filter au_directus_api cli bootstrap
+pnpm --filter quantum_directus_api cli bootstrap
 ```
 
 ### 6. Build app, and run the api
 
 ```
-pnpm --filter au_directus_app build && pnpm --filter au_directus_api dev
+pnpm --filter quantum_directus_app build && pnpm --filter quantum_directus_api dev
 ```
 
 > There is no watch mode for the app, so it should be rerunned after every app changes.
 
 #### Update quantum dependency manually
 ```
-cp -a app/dist ../quantum_ugyvitel/node_modules/au_directus_app && \
-cp -a api/dist ../quantum_ugyvitel/node_modules/au_directus_api
+cp -a app/dist ../quantum_ugyvitel/node_modules/quantum_directus_app && \
+cp -a api/dist ../quantum_ugyvitel/node_modules/quantum_directus_api
 ```
 
 ## Publishing the npm package
@@ -88,8 +88,8 @@ cp -a api/dist ../quantum_ugyvitel/node_modules/au_directus_api
 pnpm -r build && \
 NODE_AUTH_TOKEN=[...] \
 pnpm \
---filter au_directus_app \
---filter au_directus_api \
---filter au_directus \
+--filter quantum_directus_app \
+--filter quantum_directus_api \
+--filter quantum_directus \
 publish --access=public --no-git-checks
 ```

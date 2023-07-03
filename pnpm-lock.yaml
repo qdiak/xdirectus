@@ -107,7 +107,7 @@ importers:
       async:
         specifier: 3.2.4
         version: 3.2.4
-      au_directus_app:
+      quantum_directus_app:
         specifier: workspace:*
         version: link:../app
       axios:
@@ -886,7 +886,7 @@ importers:
       '@directus/update-check':
         specifier: workspace:*
         version: link:../packages/update-check
-      au_directus_api:
+      quantum_directus_api:
         specifier: workspace:*
         version: link:../api
 
