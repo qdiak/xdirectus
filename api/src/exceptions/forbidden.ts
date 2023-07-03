@@ -3,8 +3,8 @@ import * as exceptions from '@directus/exceptions';
 const { BaseException } = exceptions;
 
 export class ForbiddenException extends BaseException {
-	constructor() {
-		super(`You don't have permission to access this.`, 403, 'FORBIDDEN');
+	constructor(details = '') {
+		super(`You don't have permission to access this. ${details}`, 403, 'FORBIDDEN');
 
 		/**
 		 * We currently don't show the reason for a forbidden exception in the API output, as that

@@ -602,13 +602,15 @@ export class AuthorizationService {
 			fields: ['*'],
 		};
 
+		const details = `${collection}.${action}`;
+
 		if (Array.isArray(pk)) {
 			const result = await itemsService.readMany(pk, { ...query, limit: pk.length }, { permissionsAction: action });
-			if (!result) throw new ForbiddenException();
-			if (result.length !== pk.length) throw new ForbiddenException();
+			if (!result) throw new ForbiddenException(details);
+			if (result.length !== pk.length) throw new ForbiddenException(details);
 		} else {
 			const result = await itemsService.readOne(pk, query, { permissionsAction: action });
-			if (!result) throw new ForbiddenException();
+			if (!result) throw new ForbiddenException(details);
 		}
 	}
 }
