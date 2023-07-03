@@ -387,6 +387,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 				if (opts.bypassEmitAction) {
 					opts.bypassEmitAction(nestedActionEvent);
 				} else {
+					nestedActionEvent.meta['nested'] = true;
 					emitter.emitAction(nestedActionEvent.event, nestedActionEvent.meta, nestedActionEvent.context);
 				}
 			}
@@ -404,7 +405,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 	 */
 	async readByQuery(query: Query, opts?: QueryOptions): Promise<Item[]> {
 		resolveCreatedByMe(query, this.accountability);
-		
+
 		const updatedQuery =
 			opts?.emitEvents !== false
 				? await emitter.emitFilter(
