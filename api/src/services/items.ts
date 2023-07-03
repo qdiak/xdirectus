@@ -453,7 +453,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 		const results = await this.readByQuery(queryWithKey, opts);
 
 		if (results.length === 0) {
-			throw new ForbiddenException();
+			throw new ForbiddenException('not found');
 		}
 
 		return results[0]!;
