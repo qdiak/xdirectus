@@ -1,12 +1,12 @@
 <template>
-	<v-dialog :model-value="currentRendszeruzenet !== null">
+	<v-dialog :model-value="currentRendszeruzenet !== undefined">
 		<v-card>
 			<v-card-title>{{ currentRendszeruzenet?.targy }}</v-card-title>
 			<v-card-text>
 				{{ currentRendszeruzenet?.uzenet }}
 			</v-card-text>
 			<v-card-actions>
-				<v-button :loading="approving" @click="approve()">
+				<v-button :loading="approving" @click="approve(currentRendszeruzenet?.id as number)">
 					{{ currentRendszeruzenet?.gomb_szoveg || 'OK' }}
 				</v-button>
 			</v-card-actions>
@@ -15,133 +15,209 @@
 </template>
 
 <script lang="ts">
-import api from '@/api';
+import { getToken } from '@/api';
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAppStore } from '@directus/stores';
 import _ from 'lodash';
-import { AxiosResponse } from 'axios';
 import { refresh } from '../auth';
+
+type RendszeruzenetItem = {
+	id: number;
+	targy: string;
+	uzenet: string;
+	gomb_szoveg: string;
+	gomb_link: string;
+};
+
+const getBackendHost = () => {
+	const { host, port } = window.location;
+
+	if (port) {
+		// localhost
+		// port is specified
+		// possible host: localhost:3030, 127.0.0.1:3030
+		return host.replace('3030', '8055');
+	} else if (host.includes('3030')) {
+		// Probably GitPod
+		// port is included into the subdomain
+		// Expected host: 3030-qdiak-quantumugyvitel-zx4yhwwh20o.ws-us101.gitpod.io
+		return host.replace('3030', '8055');
+	} else {
+		// Production
+		// No port specified
+		// Expected host: cloud.qdiak.hu
+		// TODO how to determine the backend hostname?
+		return null;
+	}
+};
 
 export default defineComponent({
 	setup() {
-		const appStore = useAppStore();
 		const router = useRouter();
+		const backendHost = getBackendHost();
 
-		type RendszeruzenetItem = {
-			id: number;
-			targy: string;
-			uzenet: string;
-			tipus: string;
-			gomb_szoveg: string;
-			gomb_link: string;
-		};
-
-		type RendszeruzenetResponse = {
-			data: {
-				longPolling: boolean;
-				items: RendszeruzenetItem[];
-			};
-		};
-
-		_.set(window, '_test_rendszeruzenet', async (msg: string, overrideDefault: any) => {
-			await api.post('/items/rendszeruzenet', {
-				targy: 'Teszt',
-				uzenet: msg,
-				tipus: 'info',
-				gomb_szoveg: 'OK',
-				gomb_link: '/content/dolgozo',
-				olvasott: false,
-				...overrideDefault,
-			});
-		});
-
-		_.set(window, '_test_rendszeruzenet_locally', async (msg: string, overrideDefault: any) => {
-			console.log('mivan')
-			currentRendszeruzenet.value = {
-				targy: 'Teszt',
-				uzenet: msg,
-				tipus: 'info',
-				gomb_szoveg: 'OK',
-				gomb_link: '/content/dolgozo',
-				olvasott: false,
-				...overrideDefault,
-			};
-		});
-
-		function sleep(ms: number) {
-			return new Promise((resolve) => setTimeout(resolve, ms));
+		if (!backendHost) {
+			console.error('Unable to determine backend host');
+			return;
 		}
 
-		const POLL_TIMEOUT = 2000;
-		let longPollingDisabled = false;
-		let errorCount = 0;
-		let currentRendszeruzenet = ref<RendszeruzenetItem | null>(null);
-		let approving = ref<boolean | null>(false);
+		const url = `ws://${backendHost}/websocket`;
+		let delayPending = false;
+		let connection: WebSocket | null;
+		let queue: RendszeruzenetItem[] = [];
+		let currentRendszeruzenet = ref<RendszeruzenetItem | undefined>(undefined);
+		let markAsRead: (id: number) => void;
+		let approving = false;
 
-		async function checkMessages() {
-			try {
-				if (appStore.authenticated && !currentRendszeruzenet.value) {
-					// console.log('poll...');
-					const result = (await api.get<any, AxiosResponse<RendszeruzenetResponse>>('/rendszeruzenet')).data.data;
+		const showNext = (delay: boolean) => {
+			setTimeout(
+				() => {
+					currentRendszeruzenet.value = queue.shift();
+				},
+				delay ? 500 : 0
+			);
+		};
 
-					if (result.longPolling === false) {
-						longPollingDisabled = true;
-					}
+		const approve = (id: number) => {
+			markAsRead(id);
+		};
 
-					if (result.items.length) {
-						currentRendszeruzenet.value = result.items[0]; // TODO return only one!
-					}
-				} else {
-					// wait...
-					// console.log('wait...');
-				}
-
-				errorCount = 0;
-			} catch (err) {
-				if (_.get(err, 'response.status') === 401) {
-					try {
-						await refresh();
-					} catch (refreshErr) {
-						// console.error(refreshErr);
-					}
-				}
-
-				errorCount++;
-				// console.error(err);
+		function restart(delay = 0) {
+			if (delayPending) {
+				// Újraindítás már elindult, ebben a fázisban nem reseteljük ismét, különben több connection indulhat.
+				return;
 			}
+			console.log(`Restart socket in ${delay}ms`);
 
-			await sleep(POLL_TIMEOUT);
+			connection = null;
+			delayPending = true;
 
-			if (!longPollingDisabled && errorCount < 5) {
-				void checkMessages();
-			}
+			setTimeout(start, delay);
 		}
 
-		void checkMessages();
+		async function start() {
+			delayPending = false;
+			const access_token = getToken() || (await refresh());
 
-		async function approve() {
-			if (approving.value) {
+			if (!access_token) {
+				console.log('User is not logged in');
+
+				restart(5000);
 				return;
 			}
 
-			try {
-				approving.value = true;
-				await api.patch('/items/rendszeruzenet/' + currentRendszeruzenet.value?.id, { olvasott: true });
+			console.log('Create new socket');
+			connection = new WebSocket(url);
+
+			markAsRead = (id: number) => {
+				console.log('Delete item', id);
+				approving = true;
+
+				connection?.send(
+					JSON.stringify({
+						type: 'items',
+						collection: 'rendszeruzenet',
+						action: 'delete',
+						id,
+					})
+				);
+
 				const link = currentRendszeruzenet.value?.gomb_link;
 
 				if (link && link.length) {
 					router.push(link);
 				}
-			} catch (err) {
-				// console.error(err);
-			}
+			};
 
-			// close the dialogue
-			// the message will come up again anyway if the update is not successful
-			currentRendszeruzenet.value = null;
-			approving.value = false;
+			connection?.addEventListener('open', function () {
+				console.log('Socket open, authenticate');
+
+				connection?.send(
+					JSON.stringify({
+						type: 'auth',
+						access_token,
+					})
+				);
+			});
+
+			connection?.addEventListener('message', function (message) {
+				const data = JSON.parse(message.data);
+
+				if (data.type === 'auth') {
+					if (data.status === 'ok') {
+						console.log('Authenticated, subscribe');
+
+						connection?.send(
+							JSON.stringify({
+								type: 'subscribe',
+								collection: 'rendszeruzenet',
+								query: {
+									fields: ['id', 'uzenet', 'targy', 'gomb_szoveg', 'gomb_link'],
+									filter: {
+										_created_by_me: true,
+									},
+									limit: -1,
+								},
+							})
+						);
+					} else {
+						console.log('Socket auth failed');
+
+						restart(10000);
+					}
+				}
+
+				if (data.type === 'subscription') {
+					if (data.event === 'init') {
+						console.log('Subscribed');
+					}
+
+					if (data.event === 'delete') {
+						console.log('Items deleted', data.data);
+
+						// Hide if the current was deleted
+						if (data.data.find((id: number) => id === currentRendszeruzenet.value?.id)) {
+							currentRendszeruzenet.value = undefined;
+							approving = false;
+						}
+
+						// Remove all deleted messages from the queue
+						queue = queue.filter((r) => !data.data.includes(r.id));
+
+						if (!currentRendszeruzenet.value) {
+							showNext(true);
+						}
+					} else if (data.event === 'init' || data.event === 'create') {
+						if (data.data.length) {
+							console.log('Items received', data.data);
+
+							queue = queue.concat(data.data);
+
+							if (!currentRendszeruzenet.value) {
+								showNext(false);
+							}
+						}
+					}
+				}
+			});
+
+			connection?.addEventListener('close', function () {
+				console.log('Socket closed');
+
+				restart(5000);
+			});
+
+			connection?.addEventListener('error', function (error) {
+				console.error(error);
+				console.log('Socket error');
+
+				restart(30000);
+			});
 		}
+
+		// Wait until the authentication completes on the client
+		delayPending = true;
+		setTimeout(start, 500);
 
 		return {
 			currentRendszeruzenet,

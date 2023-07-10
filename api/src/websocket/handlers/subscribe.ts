@@ -13,6 +13,7 @@ import type { WebSocketEvent } from '../messages.js';
 import { WebSocketSubscribeMessage } from '../messages.js';
 import type { Subscription, SubscriptionEvent, WebSocketClient } from '../types.js';
 import { fmtMessage, getMessageType } from '../utils/message.js';
+import { get, set, unset } from 'lodash-es';
 
 /**
  * Handler responsible for subscriptions
@@ -315,6 +316,13 @@ export class SubscribeHandler {
 		event?: WebSocketEvent
 	) {
 		const query = subscription.query ?? {};
+
+		// A rendszeruzeneteknel hasznaljuk
+		if (get(query, 'filter._created_by_me')) {
+			unset(query, 'filter._created_by_me');
+			set(query, 'filter.user_created._eq', accountability?.user);
+		}
+
 		const service = getService(subscription.collection, { schema, accountability });
 
 		if (!event?.action) {
