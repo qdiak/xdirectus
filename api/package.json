@@ -1,6 +1,6 @@
 {
 	"name": "quantum_directus_api",
-	"version": "11.1.3",
+	"version": "11.1.8",
 	"description": "Directus API v11.1.0",
 	"keywords": [
 		"directus",
