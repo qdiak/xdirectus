@@ -65,21 +65,21 @@ pnpm build
 Legyen létrehozva, és elérhetp az üres db az env fájlban megadottak alapján.
 
 ```
-pnpm --filter quantum_directus_api cli bootstrap
+pnpm --filter qdirectus_api cli bootstrap
 ```
 
 ### 6. Build app, and run the api
 
 ```
-pnpm --filter quantum_directus_app build && pnpm --filter quantum_directus_api dev
+pnpm --filter qdirectus_app build && pnpm --filter qdirectus_api dev
 ```
 
 > There is no watch mode for the app, so it should be rerunned after every app changes.
 
 #### Update quantum dependency manually
 ```
-cp -a app/dist ../quantum_ugyvitel/node_modules/quantum_directus_app && \
-cp -a api/dist ../quantum_ugyvitel/node_modules/quantum_directus_api
+cp -a app/dist ../quantum_ugyvitel/node_modules/qdirectus_app && \
+cp -a api/dist ../quantum_ugyvitel/node_modules/qdirectus_api
 ```
 
 ## Publishing the npm package
@@ -100,8 +100,8 @@ cp -a api/dist ../quantum_ugyvitel/node_modules/quantum_directus_api
 pnpm -r build && \
 NODE_AUTH_TOKEN=[...] \
 pnpm \
---filter quantum_directus_app \
---filter quantum_directus_api \
---filter quantum_directus \
+--filter qdirectus_app \
+--filter qdirectus_api \
+--filter qdirectus \
 publish --access=public --no-git-checks
 ```

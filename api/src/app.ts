@@ -206,7 +206,7 @@ export default async function createApp(): Promise<express.Application> {
 	});
 
 	if (env['SERVE_APP']) {
-		const adminPath = require.resolve('quantum_directus_app');
+		const adminPath = require.resolve('qdirectus_app');
 		const adminUrl = new Url(env['PUBLIC_URL']).addPath('admin');
 
 		const embeds = extensionManager.getEmbeds();

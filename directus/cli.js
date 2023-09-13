@@ -12,4 +12,4 @@ if (version) {
 	await updateCheck(version);
 }
 
-import('quantum_directus_api/cli/run.js');
+import('qdirectus_api/cli/run.js');
