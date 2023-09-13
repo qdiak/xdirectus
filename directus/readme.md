@@ -1,8 +1,8 @@
-# Quantum Directus
+# Directus
 
 Fork of [Directus](https://github.com/directus/directus).
 
-It contains modifications for special needs of Quantum Iskolaszövetkezet.
+It contains modifications for special needs of us.
 
 ## Running locally
 
@@ -76,7 +76,7 @@ pnpm --filter qdirectus_app build && pnpm --filter qdirectus_api dev
 
 > There is no watch mode for the app, so it should be rerunned after every app changes.
 
-#### Update quantum dependency manually
+#### Update dependency manually
 ```
 cp -a app/dist ../quantum_ugyvitel/node_modules/qdirectus_app && \
 cp -a api/dist ../quantum_ugyvitel/node_modules/qdirectus_api

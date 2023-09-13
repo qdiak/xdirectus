@@ -1,6 +1,6 @@
 {
 	"name": "qdirectus",
-	"version": "10.6.1",
+	"version": "10.6.2",
 	"description": "Directus v10.6.1",
 	"keywords": [
 		"directus",
@@ -24,7 +24,7 @@
 	"homepage": "https://directus.io",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/qdiak/directus.git"
+		"url": "https://github.com/directus/directus.git"
 	},
 	"funding": "https://github.com/directus/directus?sponsor=1",
 	"license": "BUSL-1.1",
