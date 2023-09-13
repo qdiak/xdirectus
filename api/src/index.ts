@@ -1,6 +1,6 @@
 export { default as createApp } from './app.js';
 export * from './services/index.js';
-export * from './exceptions/index.js';
+export * from './errors/index.js';
 export * from './utils/get-schema.js';
 export * from './services/activity.js';
 export * from './services/assets.js';

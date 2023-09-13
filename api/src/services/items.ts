@@ -2,7 +2,7 @@ import { Action } from '@directus/constants';
 import type { Accountability, PermissionsAction, Query, SchemaOverview } from '@directus/types';
 import type Keyv from 'keyv';
 import type { Knex } from 'knex';
-import { assign, clone, cloneDeep, omit, pick, without } from 'lodash-es';
+import { assign, clone, cloneDeep, get, omit, pick, set, unset, without } from 'lodash-es';
 import { getCache } from '../cache.js';
 import { getHelpers } from '../database/helpers/index.js';
 import getDatabase from '../database/index.js';
@@ -74,6 +74,8 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 	}
 
 	async getKeysByQuery(query: Query): Promise<PrimaryKey[]> {
+		resolveCreatedByMe(query, this.accountability);
+
 		const primaryKeyField = this.schema.collections[this.collection]!.primary;
 		const readQuery = cloneDeep(query);
 		readQuery.fields = [primaryKeyField];
@@ -358,6 +360,8 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 	 * Get items by query
 	 */
 	async readByQuery(query: Query, opts?: QueryOptions): Promise<Item[]> {
+		resolveCreatedByMe(query, this.accountability);
+		
 		const updatedQuery =
 			opts?.emitEvents !== false
 				? await emitter.emitFilter(
@@ -484,6 +488,8 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 	 * Update multiple items by query
 	 */
 	async updateByQuery(query: Query, data: Partial<Item>, opts?: MutationOptions): Promise<PrimaryKey[]> {
+		resolveCreatedByMe(query, this.accountability);
+
 		const keys = await this.getKeysByQuery(query);
 
 		const primaryKeyField = this.schema.collections[this.collection]!.primary;
@@ -823,6 +829,8 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 	 * Delete multiple items by query
 	 */
 	async deleteByQuery(query: Query, opts?: MutationOptions): Promise<PrimaryKey[]> {
+		resolveCreatedByMe(query, this.accountability);
+
 		const keys = await this.getKeysByQuery(query);
 
 		const primaryKeyField = this.schema.collections[this.collection]!.primary;
@@ -991,5 +999,16 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 		}
 
 		return await this.createOne(data, opts);
+	}
+}
+
+// qpower
+const resolveCreatedByMe = (query: Query, accountability: Accountability | null) => {
+	if (get(query, 'filter._created_by_me')) {
+		unset(query, 'filter._created_by_me');
+
+		if (accountability?.user) {
+			set(query, 'filter.user_created._eq', accountability?.user);
+		}
 	}
 }
