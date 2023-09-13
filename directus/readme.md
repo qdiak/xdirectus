@@ -52,7 +52,17 @@ Installnál maradjanak az eredeti verziószámok, különben nem fogja megtalál
 pnpm i
 ```
 
+### 4.1. Build
+
+A boostrtap dist-ből használja a shared-et.
+
+```
+pnpm build
+```
+
 ### 5. Initialize dabatase
+
+Legyen létrehozva, és elérhetp az üres db az env fájlban megadottak alapján.
 
 ```
 pnpm --filter quantum_directus_api cli bootstrap
@@ -83,6 +93,8 @@ cp -a api/dist ../quantum_ugyvitel/node_modules/quantum_directus_api
 ### 2. Build & publish
 
 > Replace the NPM auth token that defines the target account.
+
+> NPM Access token must be a Classic Automation Access Token.
 
 ```
 pnpm -r build && \
