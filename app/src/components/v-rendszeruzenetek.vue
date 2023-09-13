@@ -3,7 +3,7 @@
 		<v-card>
 			<v-card-title>{{ currentRendszeruzenet?.targy }}</v-card-title>
 			<v-card-text>
-				{{ currentRendszeruzenet?.uzenet }}
+				<div class="rendszeruzenet-text" v-html="currentRendszeruzenet?.uzenet"></div>
 			</v-card-text>
 			<v-card-actions>
 				<v-button :loading="approving" @click="approve(currentRendszeruzenet?.id as number)">
@@ -13,6 +13,20 @@
 		</v-card>
 	</v-dialog>
 </template>
+
+<style lang="scss">
+.rendszeruzenet-text {
+	user-select: text;
+
+	a {
+		text-decoration: underline;
+	}
+
+	> * {
+		user-select: text;
+	}
+}
+</style>
 
 <script lang="ts">
 import { getToken } from '@/api';
