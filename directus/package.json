@@ -1,6 +1,6 @@
 {
-	"name": "qdirectus",
-	"version": "10.6.2",
+	"name": "quantum_directus",
+	"version": "10.6.3",
 	"description": "Directus v10.6.1",
 	"keywords": [
 		"directus",
@@ -53,7 +53,7 @@
 		"directus": "cli.js"
 	},
 	"dependencies": {
-		"qdirectus_api": "workspace:*",
+		"quantum_directus_api": "workspace:*",
 		"@directus/update-check": "workspace:*"
 	},
 	"engines": {
