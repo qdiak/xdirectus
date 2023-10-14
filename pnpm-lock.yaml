@@ -287,7 +287,7 @@ importers:
       qs:
         specifier: 6.11.2
         version: 6.11.2
-      qdirectus_app:
+      quantum_directus_app:
         specifier: workspace:*
         version: link:../app
       rate-limiter-flexible:
@@ -892,7 +892,7 @@ importers:
       '@directus/update-check':
         specifier: workspace:*
         version: link:../packages/update-check
-      qdirectus_api:
+      quantum_directus_api:
         specifier: workspace:*
         version: link:../api
 

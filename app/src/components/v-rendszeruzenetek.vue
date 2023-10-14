@@ -14,20 +14,6 @@
 	</v-dialog>
 </template>
 
-<style lang="scss">
-.rendszeruzenet-text {
-	user-select: text;
-
-	a {
-		text-decoration: underline;
-	}
-
-	> * {
-		user-select: text;
-	}
-}
-</style>
-
 <script lang="ts">
 import { getToken } from '@/api';
 import { defineComponent, ref } from 'vue';
@@ -43,39 +29,35 @@ type RendszeruzenetItem = {
 	gomb_link: string;
 };
 
-const getBackendHost = () => {
+const getBackendUrl = () => {
 	const { host, port } = window.location;
+
+	if (localStorage.getItem('wsUrl')) {
+		return localStorage.getItem('wsUrl')
+	}
 
 	if (port) {
 		// localhost
 		// port is specified
 		// possible host: localhost:3030, 127.0.0.1:3030
-		return host.replace('3030', '8055');
+		return `ws://${host.replace('3030', '8055')}/websocket`;
 	} else if (host.includes('3030')) {
 		// Probably GitPod
 		// port is included into the subdomain
 		// Expected host: 3030-qdiak-quantumugyvitel-zx4yhwwh20o.ws-us101.gitpod.io
-		return host.replace('3030', '8055');
+		return `ws://${host.replace('3030', '8055')}/websocket`;
 	} else {
 		// Production
 		// No port specified
 		// Expected host: cloud.qdiak.hu
-		// TODO how to determine the backend hostname?
-		return null;
+		return `ws://backend.${host}/websocket`
 	}
 };
 
 export default defineComponent({
 	setup() {
 		const router = useRouter();
-		const backendHost = getBackendHost();
-
-		if (!backendHost) {
-			console.error('Unable to determine backend host');
-			return;
-		}
-
-		const url = `ws://${backendHost}/websocket`;
+		const url = getBackendUrl();
 		let delayPending = false;
 		let connection: WebSocket | null;
 		let queue: RendszeruzenetItem[] = [];
@@ -101,7 +83,7 @@ export default defineComponent({
 				// Újraindítás már elindult, ebben a fázisban nem reseteljük ismét, különben több connection indulhat.
 				return;
 			}
-			console.log(`Restart socket in ${delay}ms`);
+			// console.log(`Restart socket in ${delay}ms`);
 
 			connection = null;
 			delayPending = true;
@@ -114,17 +96,17 @@ export default defineComponent({
 			const access_token = getToken() || (await refresh());
 
 			if (!access_token) {
-				console.log('User is not logged in');
+				// console.log('User is not logged in');
 
 				restart(5000);
 				return;
 			}
 
-			console.log('Create new socket');
+			// console.log('Create new socket');
 			connection = new WebSocket(url);
 
 			markAsRead = (id: number) => {
-				console.log('Delete item', id);
+				// console.log('Delete item', id);
 				approving = true;
 
 				connection?.send(
@@ -144,7 +126,7 @@ export default defineComponent({
 			};
 
 			connection?.addEventListener('open', function () {
-				console.log('Socket open, authenticate');
+				// console.log('Socket open, authenticate');
 
 				connection?.send(
 					JSON.stringify({
@@ -159,7 +141,7 @@ export default defineComponent({
 
 				if (data.type === 'auth') {
 					if (data.status === 'ok') {
-						console.log('Authenticated, subscribe');
+						// console.log('Authenticated, subscribe');
 
 						connection?.send(
 							JSON.stringify({
@@ -175,7 +157,7 @@ export default defineComponent({
 							})
 						);
 					} else {
-						console.log('Socket auth failed');
+						// console.log('Socket auth failed');
 
 						restart(10000);
 					}
@@ -183,11 +165,11 @@ export default defineComponent({
 
 				if (data.type === 'subscription') {
 					if (data.event === 'init') {
-						console.log('Subscribed');
+						// console.log('Subscribed');
 					}
 
 					if (data.event === 'delete') {
-						console.log('Items deleted', data.data);
+						// console.log('Items deleted', data.data);
 
 						// Hide if the current was deleted
 						if (data.data.find((id: number) => id === currentRendszeruzenet.value?.id)) {
@@ -203,7 +185,7 @@ export default defineComponent({
 						}
 					} else if (data.event === 'init' || data.event === 'create') {
 						if (data.data.length) {
-							console.log('Items received', data.data);
+							// console.log('Items received', data.data);
 
 							queue = queue.concat(data.data);
 
@@ -216,14 +198,14 @@ export default defineComponent({
 			});
 
 			connection?.addEventListener('close', function () {
-				console.log('Socket closed');
+				// console.log('Socket closed');
 
 				restart(5000);
 			});
 
 			connection?.addEventListener('error', function (error) {
 				console.error(error);
-				console.log('Socket error');
+				// console.log('Socket error');
 
 				restart(30000);
 			});
@@ -241,3 +223,17 @@ export default defineComponent({
 	},
 });
 </script>
+
+<style lang="scss">
+.rendszeruzenet-text {
+	user-select: text;
+
+	a {
+		text-decoration: underline;
+	}
+
+	> * {
+		user-select: text;
+	}
+}
+</style>
