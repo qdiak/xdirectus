@@ -86,7 +86,7 @@ cp -a api/dist ../quantum_ugyvitel/node_modules/quantum_directus_api
 
 ### 1. Increase version
 
-1. `package.json` -> `{ "version': "1.0.x", [...] }`
+1. `directus/package.json` -> `{ "version': "1.0.x", [...] }`
 1. `api/package.json` -> `{ "version': "1.0.x", [...] }`
 1. `app/package.json` -> `{ "version': "1.0.x", [...] }`
 

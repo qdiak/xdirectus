@@ -47,8 +47,10 @@ export const useStatesStore = defineStore('statesStore', () => {
 							'state.id',
 							'state.primary_actions.action_id',
 							'state.primary_actions.role',
+							`state.primary_actions.nezet_${collection}`,
 							'state.secondary_actions.action_id',
 							'state.secondary_actions.role',
+							`state.secondary_actions.nezet_${collection}`,
 							'state.can_edit.directus_roles_id',
 						],
 						filter: {
@@ -70,22 +72,23 @@ export const useStatesStore = defineStore('statesStore', () => {
 				const secondaryActionIds: number[] = []
 
 				for (const item of items) {
-					const authorized = isAdmin || item.state.can_edit.map((can_edit: any) => can_edit.directus_roles_id).includes(currentUser?.role?.id)
+					const stateAuthorized = isAdmin || item.state.can_edit.map((can_edit: any) => can_edit.directus_roles_id).includes(currentUser?.role?.id)
 
-					if (authorized) {
+					if (stateAuthorized) {
 						for (const primaryKapcsolo of item.state.primary_actions) {
-							const authorized = isAdmin || primaryKapcsolo.role === currentUser?.role?.id
+							const actionAuthorized = isAdmin || primaryKapcsolo.role === currentUser?.role?.id
+							const allowedOnThisNezet = Boolean(primaryKapcsolo[`nezet_${collection}`])
 
-							if (authorized) {
+							if (actionAuthorized && allowedOnThisNezet) {
 								primaryActionIds.push(primaryKapcsolo.action_id)
 							}
-
 						}
 
 						for (const secondaryKapcsolo of item.state.secondary_actions) {
-							const authorized = isAdmin || secondaryKapcsolo.role === currentUser?.role?.id
+							const actionAuthorized = isAdmin || secondaryKapcsolo.role === currentUser?.role?.id
+							const allowedOnThisNezet = Boolean(secondaryKapcsolo[`nezet_${collection}`])
 
-							if (authorized && !primaryActionIds.includes(secondaryKapcsolo.action_id)) {
+							if (actionAuthorized && allowedOnThisNezet && !primaryActionIds.includes(secondaryKapcsolo.action_id)) {
 								secondaryActionIds.push(secondaryKapcsolo.action_id)
 							}
 						}
