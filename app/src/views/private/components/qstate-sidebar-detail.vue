@@ -107,9 +107,12 @@ const runAction = async (action: Action) => {
 	runningActions.value = [...runningActions.value, action.id];
 
 	try {
-		await api.post(`state/action/${action.type}`, {
-			collection: collection.value,
-			ids: toRaw(primaryKey.value ? [primaryKey.value] : selection.value)
+		await api.post('/quantum_process/stateTransition/run', {
+			input: {
+				actionType: action.type,
+				collection: collection.value,
+				ids: toRaw(primaryKey.value ? [primaryKey.value] : selection.value)
+			}
 		});
 
 		emit('refresh');
