@@ -602,6 +602,9 @@ export class AuthorizationService {
 			fields: ['*'],
 		};
 
+		// TODO qpower
+		// const details = `${collection}.${action}`;
+
 		if (Array.isArray(pk)) {
 			const result = await itemsService.readMany(pk, { ...query, limit: pk.length }, { permissionsAction: action });
 			if (!result) throw new ForbiddenError();

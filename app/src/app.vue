@@ -101,6 +101,8 @@ useSystem();
 		</v-info>
 
 		<router-view v-else-if="!hydrating" />
+
+		<v-rendszeruzenetek />
 	</div>
 
 	<teleport to="#custom-css">{{ customCSS }}</teleport>
