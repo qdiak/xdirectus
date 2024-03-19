@@ -485,7 +485,7 @@ export class UsersService extends ItemsService {
 				to: user.email,
 				subject: subjectLine,
 				template: {
-					name: 'password-reset',
+					name: 'password-reset-hu',
 					data: {
 						url: acceptURL,
 						email: user.email,

@@ -29,6 +29,7 @@ async function onSubmit() {
 	try {
 		await api.post(`/auth/password/request`, {
 			email: email.value,
+			subject: t('password_reset'),
 		});
 
 		done.value = true;

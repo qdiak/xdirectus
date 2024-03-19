@@ -1,7 +1,7 @@
 {
-	"name": "@directus/app",
-	"version": "11.0.4",
-	"description": "App dashboard for Directus",
+	"name": "quantum_directus_app",
+	"version": "11.0.4-q1",
+	"description": "Directus App v11.0.4",
 	"homepage": "https://directus.io",
 	"repository": {
 		"type": "git",
