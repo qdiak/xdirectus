@@ -538,6 +538,12 @@ function clearFilters() {
 					:selection="selection"
 					@refresh="batchRefresh"
 				/>
+				<qstate-sidebar-detail
+					location="collection"
+					:collection="collection"
+					:selection="selection"
+					@refresh="batchRefresh"
+				/>
 			</template>
 
 			<v-dialog :model-value="deleteError !== null">

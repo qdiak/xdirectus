@@ -1,7 +1,7 @@
 {
-	"name": "directus",
-	"version": "10.10.7",
-	"description": "Directus is a real-time API and App dashboard for managing SQL database content",
+	"name": "quantum_directus",
+	"version": "10.10.8-quantum.0",
+	"description": "quantum_directus",
 	"keywords": [
 		"directus",
 		"realtime",
@@ -54,7 +54,7 @@
 		"directus": "cli.js"
 	},
 	"dependencies": {
-		"@directus/api": "workspace:*",
+		"quantum_directus_api": "workspace:*",
 		"@directus/update-check": "workspace:*"
 	},
 	"engines": {

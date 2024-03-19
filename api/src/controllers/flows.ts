@@ -10,6 +10,10 @@ import { FlowsService } from '../services/flows.js';
 import { MetaService } from '../services/meta.js';
 import asyncHandler from '../utils/async-handler.js';
 import { sanitizeQuery } from '../utils/sanitize-query.js';
+import { applyOptionsData } from '@directus/utils';
+import getDatabase from '../database/index.js';
+import { getSchema } from '../index.js';
+import operationRequest from '../operations/request/index.js';
 
 const router = express.Router();
 
@@ -43,6 +47,59 @@ const webhookFlowHandler = asyncHandler(async (req, res, next) => {
 
 router.get(`/trigger/:pk(${UUID_REGEX})`, webhookFlowHandler, respond);
 router.post(`/trigger/:pk(${UUID_REGEX})`, webhookFlowHandler, respond);
+
+router.post(
+	`/trigger-simple-request/:pk(${UUID_REGEX})`,
+	asyncHandler(async (req, _res, next) => {
+		try {
+			const flowsService = new FlowsService({ knex: getDatabase(), schema: await getSchema() });
+
+			const flow = (await flowsService.readOne(req.params['pk'] as string)) as any;
+
+			const keyedData: Record<string, unknown> = {
+				['$trigger']: {
+					path: req.path,
+					query: req.query,
+					body: req.body,
+					method: req.method,
+					headers: req.headers,
+				},
+				['$accountability']: req.accountability,
+				// [ENV_KEY]: pick(env, env['FLOWS_ENV_ALLOW_LIST'] ? toArray(env['FLOWS_ENV_ALLOW_LIST']) : []),
+			};
+
+			const requestOptions = JSON.parse(JSON.parse(flow.simple_request_options).options);
+
+			const options = applyOptionsData(requestOptions || {}, keyedData) as any;
+
+			const context = null as any;
+			await operationRequest.handler(options, context);
+
+			return next();
+		} catch (error) {
+			if (typeof error === 'string') {
+				try {
+					const operationFailureResult = JSON.parse(error);
+					return next(
+						new Error(
+							operationFailureResult.data?.message ||
+								operationFailureResult.data ||
+								operationFailureResult.statusText ||
+								'Unexpected error'
+						)
+					);
+				} catch (_parseErr) {
+					return next(new Error(error));
+				}
+			} else if (error instanceof Error) {
+				return next(error);
+			} else {
+				return next(new Error('Unexpected error'));
+			}
+		}
+	}),
+	respond
+);
 
 router.post(
 	'/',

@@ -75,6 +75,7 @@ import VEmojiPicker from './v-emoji-picker.vue';
 import VWorkspace from './v-workspace.vue';
 import VWorkspaceTile from './v-workspace-tile.vue';
 import VErrorBoundary from './v-error-boundary.vue';
+import VRendszeruzenetek from './v-rendszeruzenetek.vue';
 
 export function registerComponents(app: App): void {
 	app.component('VAvatar', VAvatar);
@@ -119,6 +120,7 @@ export function registerComponents(app: App): void {
 	app.component('VOverlay', VOverlay);
 	app.component('VPagination', VPagination);
 	app.component('VProgressCircular', VProgressCircular);
+	app.component('VRendszeruzenetek', VRendszeruzenetek);
 	app.component('VProgressLinear', VProgressLinear);
 	app.component('VRadio', VRadio);
 	app.component('VResizeable', VResizeable);
