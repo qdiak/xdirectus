@@ -1,21 +1,5 @@
-<template>
-	<v-dialog :model-value="currentRendszeruzenet !== undefined">
-		<v-card>
-			<v-card-title>{{ currentRendszeruzenet?.targy }}</v-card-title>
-			<v-card-text>
-				<div class="rendszeruzenet-text" v-html="currentRendszeruzenet?.uzenet"></div>
-			</v-card-text>
-			<v-card-actions>
-				<v-button :loading="approving" @click="approve(currentRendszeruzenet?.id as number)">
-					{{ currentRendszeruzenet?.gomb_szoveg || 'OK' }}
-				</v-button>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
-</template>
-
 <script lang="ts">
-import { getToken } from '@/api';
+//import { getToken } from '@/api';
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import _ from 'lodash';
@@ -33,7 +17,7 @@ const getBackendUrl = () => {
 	const { host, port } = window.location;
 
 	if (localStorage.getItem('wsUrl')) {
-		return localStorage.getItem('wsUrl')
+		return localStorage.getItem('wsUrl');
 	}
 
 	if (port) {
@@ -50,12 +34,13 @@ const getBackendUrl = () => {
 		// Production
 		// No port specified
 		// Expected host: cloud.qdiak.hu
-		return `ws://backend.${host}/websocket`
+		return `ws://backend.${host}/websocket`;
 	}
 };
 
 export default defineComponent({
 	setup() {
+		/*
 		const router = useRouter();
 		const url = getBackendUrl();
 		let delayPending = false;
@@ -70,7 +55,7 @@ export default defineComponent({
 				() => {
 					currentRendszeruzenet.value = queue.shift();
 				},
-				delay ? 500 : 0
+				delay ? 500 : 0,
 			);
 		};
 
@@ -115,7 +100,7 @@ export default defineComponent({
 						collection: 'rendszeruzenet',
 						action: 'delete',
 						id,
-					})
+					}),
 				);
 
 				const link = currentRendszeruzenet.value?.gomb_link;
@@ -132,7 +117,7 @@ export default defineComponent({
 					JSON.stringify({
 						type: 'auth',
 						access_token,
-					})
+					}),
 				);
 			});
 
@@ -154,7 +139,7 @@ export default defineComponent({
 									},
 									limit: -1,
 								},
-							})
+							}),
 						);
 					} else {
 						// console.log('Socket auth failed');
@@ -220,9 +205,26 @@ export default defineComponent({
 			approve,
 			approving,
 		};
+		*/
 	},
 });
 </script>
+
+<template>
+	<v-dialog :model-value="currentRendszeruzenet !== undefined">
+		<v-card>
+			<v-card-title>{{ currentRendszeruzenet?.targy }}</v-card-title>
+			<v-card-text>
+				<div class="rendszeruzenet-text" v-html="currentRendszeruzenet?.uzenet"></div>
+			</v-card-text>
+			<v-card-actions>
+				<v-button :loading="approving" @click="approve(currentRendszeruzenet?.id as number)">
+					{{ currentRendszeruzenet?.gomb_szoveg || 'OK' }}
+				</v-button>
+			</v-card-actions>
+		</v-card>
+	</v-dialog>
+</template>
 
 <style lang="scss">
 .rendszeruzenet-text {
