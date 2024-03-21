@@ -1,7 +1,7 @@
 import { useEnv } from '@directus/env';
 import type { Accountability, SchemaOverview } from '@directus/types';
 import { toArray, toBoolean } from '@directus/utils';
-import { version } from 'directus/version';
+import { version } from 'quantum_directus/version';
 import type { Knex } from 'knex';
 import { merge } from 'lodash-es';
 import { Readable } from 'node:stream';

@@ -1,5 +1,5 @@
 import { useEnv } from '@directus/env';
-import { version } from 'directus/version';
+import { version } from 'quantum_directus/version';
 import { type Knex } from 'knex';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { getDatabase, getDatabaseClient } from '../../database/index.js';
