@@ -2,7 +2,7 @@ import { useEnv } from '@directus/env';
 import formatTitle from '@directus/format-title';
 import { spec } from '@directus/specs';
 import type { Accountability, FieldOverview, Permission, SchemaOverview, Type } from '@directus/types';
-import { version } from 'directus/version';
+import { version } from 'quantum_directus/version';
 import type { Knex } from 'knex';
 import { cloneDeep, mergeWith } from 'lodash-es';
 import type {
