@@ -224,6 +224,7 @@ export default async function createApp(): Promise<express.Application> {
 
 		const htmlWithVars = html
 			.replace(/<base \/>/, `<base href="${adminUrl.toString({ rootRelative: true })}/" />`)
+			.replace(/="\/admin\//g, '="') // remove absolute urls to be able to use the above <base />
 			.replace('<!-- directus-embed-head -->', embeds.head)
 			.replace('<!-- directus-embed-body -->', embeds.body);
 
