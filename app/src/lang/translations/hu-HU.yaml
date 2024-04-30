@@ -177,7 +177,7 @@ presets_for_role: 'A {role} szerepkör mezőértékeinek alapértelmezései.'
 presentation_and_aliases: Prezentációk és Aliasok
 revision_post_create: Ez az elem így nézett ki létrehozásakor.
 revision_post_update: Ez az elem így nézett ki a frissítés után.
-changes_made: A revízió végrehajtása soránz az alábbi változások történtek.
+changes_made: A revízió végrehajtása során az alábbi változások történtek.
 no_relational_data: Ne feledje, hogy a relációs adatok nem tartoznak ide.
 junction_field_location: Érintkezési pont helye
 top: Legfelső
