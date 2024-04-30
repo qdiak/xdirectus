@@ -8,7 +8,8 @@
 		"lint": "eslint --cache .",
 		"test": "pnpm --recursive --filter '!tests-blackbox' test",
 		"test:blackbox": "pnpm --filter directus deploy --prod dist && pnpm --filter tests-blackbox test",
-		"quantum:version": "pnpm m --filter 'quantum_*' exec pnpm version prerelease"
+		"quantum:version": "pnpm m --filter 'quantum_*' exec pnpm version prerelease",
+		"quantum:publish": "pnpm m --filter 'quantum_*' exec pnpm publish"
 	},
 	"devDependencies": {
 		"@changesets/cli": "2.27.1",
