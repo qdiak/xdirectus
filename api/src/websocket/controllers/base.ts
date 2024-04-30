@@ -134,6 +134,11 @@ export default abstract class SocketController {
 
 		const context: UpgradeContext = { request, socket, head };
 
+		if (this.authentication.mode === 'session') {
+			await this.handleSessionUpgrade(context, query);
+			return;
+		}
+
 		if (this.authentication.mode === 'strict') {
 			await this.handleStrictUpgrade(context, query);
 			return;
@@ -148,6 +153,29 @@ export default abstract class SocketController {
 			this.catchInvalidMessages(ws);
 			const state = { accountability: null, expires_at: null } as AuthenticationState;
 			this.server.emit('connection', ws, state);
+		});
+	}
+
+	protected async handleSessionUpgrade({ request, socket, head }: UpgradeContext, query: ParsedUrlQuery) {
+		this.server.handleUpgrade(request, socket, head, async (ws) => {
+			this.catchInvalidMessages(ws);
+			const cookies = request.headers.cookie ?? '';
+			const session_token = cookies.match(/\bdirectus_session_token=([^;]*)/)?.[1];
+
+			if (session_token) {
+				try {
+					const state = await authenticateConnection({ access_token: session_token });
+					this.server.emit('connection', ws, state);
+					return
+				} catch {
+					// fallthrough
+				}
+			}
+
+			logger.debug('WebSocket session authentication failed');
+			const error = new WebSocketError('auth', 'AUTH_FAILED', 'Session authentication failed.');
+			handleWebSocketError(ws, error, 'auth');
+			ws.close();
 		});
 	}
 
