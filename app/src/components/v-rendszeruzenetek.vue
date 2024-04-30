@@ -1,9 +1,7 @@
 <script lang="ts">
-//import { getToken } from '@/api';
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import _ from 'lodash';
-import { refresh } from '../auth';
 
 type RendszeruzenetItem = {
 	id: number;
@@ -14,39 +12,17 @@ type RendszeruzenetItem = {
 };
 
 const getBackendUrl = () => {
-	const { host, port } = window.location;
-
-	if (localStorage.getItem('wsUrl')) {
-		return localStorage.getItem('wsUrl');
-	}
-
-	if (port) {
-		// localhost
-		// port is specified
-		// possible host: localhost:3030, 127.0.0.1:3030
-		return `ws://${host.replace('3030', '8055')}/websocket`;
-	} else if (host.includes('3030')) {
-		// Probably GitPod
-		// port is included into the subdomain
-		// Expected host: 3030-qdiak-quantumugyvitel-zx4yhwwh20o.ws-us101.gitpod.io
-		return `ws://${host.replace('3030', '8055')}/websocket`;
-	} else {
-		// Production
-		// No port specified
-		// Expected host: cloud.qdiak.hu
-		return `ws://backend.${host}/websocket`;
-	}
+	return document.baseURI.replace(/\/admin\/?$/, '/websocket').replace(/^http/, 'ws')
 };
 
 export default defineComponent({
 	setup() {
-		/*
 		const router = useRouter();
 		const url = getBackendUrl();
 		let delayPending = false;
 		let connection: WebSocket | null;
 		let queue: RendszeruzenetItem[] = [];
-		let currentRendszeruzenet = ref<RendszeruzenetItem | undefined>(undefined);
+		const currentRendszeruzenet = ref<RendszeruzenetItem | undefined>(undefined);
 		let markAsRead: (id: number) => void;
 		let approving = false;
 
@@ -78,14 +54,6 @@ export default defineComponent({
 
 		async function start() {
 			delayPending = false;
-			const access_token = getToken() || (await refresh());
-
-			if (!access_token) {
-				// console.log('User is not logged in');
-
-				restart(5000);
-				return;
-			}
 
 			// console.log('Create new socket');
 			connection = new WebSocket(url);
@@ -111,42 +79,23 @@ export default defineComponent({
 			};
 
 			connection?.addEventListener('open', function () {
-				// console.log('Socket open, authenticate');
-
 				connection?.send(
 					JSON.stringify({
-						type: 'auth',
-						access_token,
+						type: 'subscribe',
+						collection: 'rendszeruzenet',
+						query: {
+							fields: ['id', 'uzenet', 'targy', 'gomb_szoveg', 'gomb_link'],
+							filter: {
+								_created_by_me: true,
+							},
+							limit: -1,
+						},
 					}),
 				);
 			});
 
 			connection?.addEventListener('message', function (message) {
 				const data = JSON.parse(message.data);
-
-				if (data.type === 'auth') {
-					if (data.status === 'ok') {
-						// console.log('Authenticated, subscribe');
-
-						connection?.send(
-							JSON.stringify({
-								type: 'subscribe',
-								collection: 'rendszeruzenet',
-								query: {
-									fields: ['id', 'uzenet', 'targy', 'gomb_szoveg', 'gomb_link'],
-									filter: {
-										_created_by_me: true,
-									},
-									limit: -1,
-								},
-							}),
-						);
-					} else {
-						// console.log('Socket auth failed');
-
-						restart(10000);
-					}
-				}
 
 				if (data.type === 'subscription') {
 					if (data.event === 'init') {
@@ -205,7 +154,6 @@ export default defineComponent({
 			approve,
 			approving,
 		};
-		*/
 	},
 });
 </script>
