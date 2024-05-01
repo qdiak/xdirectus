@@ -9,7 +9,7 @@
 		"test": "pnpm --recursive --filter '!tests-blackbox' test",
 		"test:blackbox": "pnpm --filter directus deploy --prod dist && pnpm --filter tests-blackbox test",
 		"quantum:version": "pnpm m --filter 'quantum_*' exec pnpm version prerelease",
-		"quantum:publish": "pnpm m --filter 'quantum_*' exec pnpm publish",
+		"quantum:publish": "pnpm install && pnpm build && pnpm m --filter 'quantum_*' exec pnpm publish",
 		"quantum:link": "pnpm m --filter 'quantum_*' exec pnpm link -g"
 	},
 	"devDependencies": {
