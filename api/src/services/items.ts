@@ -329,6 +329,7 @@ export class ItemsService<Item extends AnyItem = AnyItem> implements AbstractSer
 				if (opts.bypassEmitAction) {
 					opts.bypassEmitAction(nestedActionEvent);
 				} else {
+					nestedActionEvent.meta['nested'] = true;
 					emitter.emitAction(nestedActionEvent.event, nestedActionEvent.meta, nestedActionEvent.context);
 				}
 			}
