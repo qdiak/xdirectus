@@ -6,7 +6,13 @@ It contains modifications for special needs of us.
 
 ## Running locally
 
-### 1. Make sure You use the right npm version
+- **REST & GraphQL API.** Instantly layers a blazingly fast Node.js API on top of any SQL database.
+- **Manage Pure SQL.** Works with new or existing SQL databases, no migration required.
+- **Choose your Database.** Supports PostgreSQL, MySQL, SQLite, OracleDB, CockroachDB, MariaDB, and MS-SQL.
+- **On-Prem or Cloud.** Run locally, install on-premises, or use our
+  [self-service Cloud service](https://directus.io/pricing).
+- **Completely Extensible.** Built to white-label, it is easy to customize our modular platform.
+- **A Modern Dashboard.** Our no-code Vue.js app is safe and intuitive for non-technical users, no training required.
 
 ```
 nvm use
@@ -16,18 +22,12 @@ nvm use
 
 Place it under  the `/api` folder!
 
-```
-HOST="localhost"
-PORT=8055
-BE_PORT=8055
-API_URL="http://0.0.0.0:8055"
+[Directus Cloud](https://directus.io/pricing) allows you to create projects, hosted by the Directus team, from
+$15/month.
 
-DB_CLIENT="pg"
-DB_HOST="localhost"
-DB_PORT=5432
-DB_DATABASE="db3"
-DB_USER="aw"
-DB_PASSWORD="password"
+- A self-service dashboard to create and monitor all your projects in one place.
+- Everything you need: Directus, database, storage, auto-scaling, and a global CDN.
+- Select your desired region and provision a new project in ~90 seconds.
 
 SERVE_APP=true
 
@@ -54,54 +54,30 @@ pnpm i
 
 ### 4.1. Build
 
-A boostrtap dist-ből használja a shared-et.
+Directus is made possible with support from our passionate core team, talented contributors, and
+amazing [GitHub Sponsors](https://github.com/sponsors/directus). Thank you all!
 
 ```
 pnpm build
 ```
 
-### 5. Initialize dabatase
+## 📄 Understanding Our License
 
-Legyen létrehozva, és elérhető az üres db az env fájlban megadottak alapján.
+Directus is licensed under [the Business Source License (BSL) 1.1](./license) with a permissive additional use grant. For most users, it operates just like open source! Here's what that means for you:
 
-```
-pnpm --filter quantum_directus_api cli bootstrap
-```
+### Free for Most Users
 
-### 6. Build app, and run the api
+If your organization has less than $5M in annual revenue and/or funding combined, you can use Directus freely in any way you'd like. Build that side project, launch your startup, or experiment with the platform — no strings attached.
 
-```
-pnpm --filter quantum_directus_app build && pnpm --filter quantum_directus_api dev
-```
+### Enterprise Usage
 
-> There is no watch mode for the app, so it should be rerunned after every app changes.
+For larger organizations (>$5M in annual revenue/funding) using Directus in production, we require a commercial license. This model helps us maintain a sustainable balance: keeping Directus free for the majority of our community while ensuring larger organizations who benefit from the platform contribute to its continued development.
 
-#### Update dependency manually
-```
-cp -a app/dist ../quantum_ugyvitel/node_modules/quantum_directus_app && \
-cp -a api/dist ../quantum_ugyvitel/node_modules/quantum_directus_api
-```
+### Why This Approach?
 
-## Publishing the npm package
+We believe in making powerful data tools accessible to everyone. This license lets us:
 
-### 1. Increase version
-
-1. `directus/package.json` -> `{ "version': "1.0.x", [...] }`
-1. `api/package.json` -> `{ "version': "1.0.x", [...] }`
-1. `app/package.json` -> `{ "version': "1.0.x", [...] }`
-
-### 2. Build & publish
-
-> Replace the NPM auth token that defines the target account.
-
-> NPM Access token must be a Classic Automation Access Token.
-
-```
-pnpm -r build && \
-NODE_AUTH_TOKEN=[...] \
-pnpm \
---filter quantum_directus_app \
---filter quantum_directus_api \
---filter quantum_directus \
-publish --access=public --no-git-checks
-```
+- Keep Directus free for individuals, startups, and smaller companies
+- Maintain active development and strong support
+- Continue improving the platform for everyone
+- Stay sustainable as an independent project

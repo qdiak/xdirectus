@@ -1,9 +1,9 @@
-import schemaPermissionsRaw from './schema-access-permissions.yaml';
+import type { DataPermission, Permission } from '../types.js';
 import permissions from './app-access-permissions.yaml';
-import { DataPermission, Permission } from '../types.js';
+import schemaPermissionsRaw from './schema-access-permissions.yaml';
 
 const defaults: Partial<Permission> = {
-	role: null,
+	policy: null,
 	permissions: {},
 	validation: null,
 	presets: null,

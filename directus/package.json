@@ -1,6 +1,6 @@
 {
 	"name": "quantum_directus",
-	"version": "10.10.8-quantum.2",
+	"version": "11.4.0-quantum.1",
 	"description": "quantum_directus",
 	"keywords": [
 		"directus",
@@ -58,6 +58,6 @@
 		"@directus/update-check": "workspace:*"
 	},
 	"engines": {
-		"node": ">=18.0.0"
+		"node": ">=22"
 	}
 }

@@ -1,8 +1,10 @@
-import BaseAttachesTool from '@editorjs/attaches';
-import BaseImageTool from '@editorjs/image';
 import { unexpectedError } from '@/utils/unexpected-error';
+import BaseAttachesTool from '@editorjs/attaches';
+import { MenuConfig } from '@editorjs/editorjs/types/tools';
+import BaseImageTool from '@editorjs/image';
+import { useBus } from './bus';
 
-/**
+/*
  * This file is a modified version of the attaches and image tool from editorjs to work with the Directus file manager.
  *
  * We include an uploader to directly use Directus file manager, along with a modified version of the attaches and image tools.
@@ -137,7 +139,7 @@ export class AttachesTool extends BaseAttachesTool {
 	}
 }
 
-export class ImageTool extends BaseImageTool {
+export class ImageTool extends (BaseImageTool as any) {
 	constructor(params: any) {
 		super(params);
 
@@ -151,11 +153,20 @@ export class ImageTool extends BaseImageTool {
 
 	set image(file: { url?: any }) {
 		this._data.file = file || {};
+		if (file?.url) this.ui.fillImage(file.url);
+	}
 
-		if (file && file.url) {
-			const separator = file.url.includes('?') ? '&' : '?';
-			const imageUrl = `${file.url}${separator}key=system-large-contain`;
-			this.ui.fillImage(imageUrl);
-		}
+	renderSettings() {
+		const openImageItem: MenuConfig = {
+			icon: '<i>open_in_new</i>',
+			title: 'Open Image',
+			toggle: false,
+			onActivate: () => {
+				const bus = useBus();
+				bus.emit({ type: 'open-url', payload: this.data.file.fileURL });
+			},
+		};
+
+		return [openImageItem, ...super.renderSettings()];
 	}
 }
