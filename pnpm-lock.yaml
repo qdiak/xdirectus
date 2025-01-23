@@ -47,9 +47,6 @@ importers:
       '@aws-sdk/client-ses':
         specifier: 3.723.0
         version: 3.723.0
-      '@directus/app':
-        specifier: workspace:*
-        version: link:../app
       '@directus/constants':
         specifier: workspace:*
         version: link:../packages/constants
@@ -335,6 +332,12 @@ importers:
       qs:
         specifier: 6.13.1
         version: 6.13.1
+      quantum_directus:
+        specifier: workspace:*
+        version: link:../directus
+      quantum_directus_app:
+        specifier: workspace:*
+        version: link:../app
       rate-limiter-flexible:
         specifier: 5.0.4
         version: 5.0.4

@@ -16,10 +16,10 @@ const config: Config = {
 	versionTitle: '📦 Published Versions',
 	noticeType: 'major',
 	// '@directus/app' should always be listed before '@directus/api', other packages don't matter
-	packageOrder: ['@directus/app', '@directus/api'],
+	packageOrder: ['quantum_directus_app', 'quantum_directus_api'],
 	linkedPackages: [
 		// Ensure '@directus/app' is bumped with 'directus' to reflect correct main version in app
-		['directus', '@directus/app'],
+		['quantum_directus', 'quantum_directus_app'],
 	],
 };
 
