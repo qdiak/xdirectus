@@ -31,6 +31,7 @@ import VDrawer from './v-drawer.vue';
 import VError from './v-error.vue';
 import VFancySelect from './v-fancy-select.vue';
 import VFieldTemplate from './v-field-template/v-field-template.vue';
+import VCollectionFieldTemplate from './v-collection-field-template.vue';
 import VFieldList from './v-field-list/v-field-list.vue';
 import VForm from './v-form/v-form.vue';
 import VHover from './v-hover.vue';
@@ -74,6 +75,7 @@ import VEmojiPicker from './v-emoji-picker.vue';
 import VWorkspace from './v-workspace.vue';
 import VWorkspaceTile from './v-workspace-tile.vue';
 import VErrorBoundary from './v-error-boundary.vue';
+import VRendszeruzenetek from './v-rendszeruzenetek.vue';
 
 export function registerComponents(app: App): void {
 	app.component('VAvatar', VAvatar);
@@ -94,6 +96,7 @@ export function registerComponents(app: App): void {
 	app.component('VError', VError);
 	app.component('VFancySelect', VFancySelect);
 	app.component('VFieldTemplate', VFieldTemplate);
+	app.component('VCollectionFieldTemplate', VCollectionFieldTemplate);
 	app.component('VFieldList', VFieldList);
 	app.component('VForm', VForm);
 	app.component('VHover', VHover);
@@ -117,6 +120,7 @@ export function registerComponents(app: App): void {
 	app.component('VOverlay', VOverlay);
 	app.component('VPagination', VPagination);
 	app.component('VProgressCircular', VProgressCircular);
+	app.component('VRendszeruzenetek', VRendszeruzenetek);
 	app.component('VProgressLinear', VProgressLinear);
 	app.component('VRadio', VRadio);
 	app.component('VResizeable', VResizeable);

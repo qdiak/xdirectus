@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useRevisions } from '@/composables/use-revisions';
 import { useExtensions } from '@/extensions';
-import type { FlowRaw } from '@directus/types';
+import { useGroupable } from '@directus/composables';
 import { Action } from '@directus/constants';
-import { computed, ref, toRefs, unref, watch } from 'vue';
+import type { FlowRaw } from '@directus/types';
+import { abbreviateNumber } from '@directus/utils';
+import { computed, onMounted, ref, toRefs, unref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { getTriggers } from '../triggers';
 
@@ -15,6 +17,13 @@ const { flow } = toRefs(props);
 
 const { t } = useI18n();
 
+const title = computed(() => t('logs'));
+
+const { active: open } = useGroupable({
+	value: title.value,
+	group: 'sidebar-detail',
+});
+
 const { triggers } = getTriggers();
 const { operations } = useExtensions();
 
@@ -24,14 +33,15 @@ const usedTrigger = computed(() => {
 
 const page = ref<number>(1);
 
-const { revisionsByDate, revisionsCount, loading, pagesCount, refresh } = useRevisions(
-	ref('directus_flows'),
-	computed(() => unref(flow).id),
-	ref(null),
-	{
-		action: Action.RUN,
-	},
-);
+const { revisionsByDate, getRevisions, revisionsCount, getRevisionsCount, loading, loadingCount, pagesCount, refresh } =
+	useRevisions(
+		ref('directus_flows'),
+		computed(() => unref(flow).id),
+		ref(null),
+		{
+			action: Action.RUN,
+		},
+	);
 
 watch(
 	() => page.value,
@@ -39,6 +49,11 @@ watch(
 		refresh(newPage);
 	},
 );
+
+onMounted(() => {
+	getRevisionsCount();
+	if (open.value) getRevisions();
+});
 
 const previewing = ref();
 
@@ -86,10 +101,19 @@ const steps = computed(() => {
 		},
 	);
 });
+
+function onToggle(open: boolean) {
+	if (open && revisionsByDate.value === null) getRevisions();
+}
 </script>
 
 <template>
-	<sidebar-detail :title="t('logs')" icon="fact_check" :badge="revisionsCount">
+	<sidebar-detail
+		:title
+		icon="fact_check"
+		:badge="!loadingCount && revisionsCount > 0 ? abbreviateNumber(revisionsCount) : null"
+		@toggle="onToggle"
+	>
 		<v-progress-linear v-if="!revisionsByDate && loading" indeterminate />
 
 		<div v-else-if="revisionsCount === 0" class="empty">{{ t('no_logs') }}</div>
@@ -162,7 +186,7 @@ const steps = computed(() => {
 							<pre class="json selectable">{{ step.options }}</pre>
 						</v-detail>
 
-						<v-detail v-if="step.data" :label="t('payload')">
+						<v-detail v-if="step.data !== null" :label="t('payload')">
 							<pre class="json selectable">{{ step.data }}</pre>
 						</v-detail>
 					</div>

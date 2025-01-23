@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { i18n } from '@/lang/';
+import { i18n } from '@/lang';
 import { hideDragImage } from '@/utils/hide-drag-image';
 import type { ShowSelect } from '@directus/extensions';
 import { clone, forEach, pick } from 'lodash';
@@ -18,49 +18,50 @@ const HeaderDefaults: Header = {
 	description: null,
 };
 
-interface Props {
-	headers: HeaderRaw[];
-	items: Item[];
-	itemKey?: string;
-	sort?: Sort | null;
-	mustSort?: boolean;
-	showSelect?: ShowSelect;
-	showResize?: boolean;
-	showManualSort?: boolean;
-	manualSortKey?: string;
-	allowHeaderReorder?: boolean;
-	modelValue?: any[];
-	fixedHeader?: boolean;
-	loading?: boolean;
-	loadingText?: string;
-	noItemsText?: string;
-	rowHeight?: number;
-	selectionUseKeys?: boolean;
-	inline?: boolean;
-	disabled?: boolean;
-	clickable?: boolean;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-	itemKey: 'id',
-	sort: undefined,
-	mustSort: false,
-	showSelect: 'none',
-	showResize: false,
-	showManualSort: false,
-	manualSortKey: undefined,
-	allowHeaderReorder: false,
-	modelValue: () => [],
-	fixedHeader: false,
-	loading: false,
-	loadingText: i18n.global.t('loading'),
-	noItemsText: i18n.global.t('no_items'),
-	rowHeight: 48,
-	selectionUseKeys: false,
-	inline: false,
-	disabled: false,
-	clickable: true,
-});
+const props = withDefaults(
+	defineProps<{
+		headers: HeaderRaw[];
+		items: Item[];
+		itemKey?: string;
+		sort?: Sort | null;
+		mustSort?: boolean;
+		showSelect?: ShowSelect;
+		showResize?: boolean;
+		showManualSort?: boolean;
+		manualSortKey?: string;
+		allowHeaderReorder?: boolean;
+		modelValue?: any[];
+		fixedHeader?: boolean;
+		loading?: boolean;
+		loadingText?: string;
+		noItemsText?: string;
+		rowHeight?: number;
+		selectionUseKeys?: boolean;
+		inline?: boolean;
+		disabled?: boolean;
+		clickable?: boolean;
+	}>(),
+	{
+		itemKey: 'id',
+		sort: undefined,
+		mustSort: false,
+		showSelect: 'none',
+		showResize: false,
+		showManualSort: false,
+		manualSortKey: undefined,
+		allowHeaderReorder: false,
+		modelValue: () => [],
+		fixedHeader: false,
+		loading: false,
+		loadingText: i18n.global.t('loading'),
+		noItemsText: i18n.global.t('no_items'),
+		rowHeight: 48,
+		selectionUseKeys: false,
+		inline: false,
+		disabled: false,
+		clickable: true,
+	},
+);
 
 const emit = defineEmits([
 	'click:row',
@@ -208,9 +209,7 @@ function onItemSelected(event: ItemSelectEvent) {
 }
 
 function getSelectedState(item: Item) {
-	const selectedKeys = props.selectionUseKeys
-		? props.modelValue
-		: props.modelValue.map((item: any) => item[props.itemKey]);
+	const selectedKeys = props.selectionUseKeys ? props.modelValue : props.modelValue.map((item) => item[props.itemKey]);
 
 	return selectedKeys.includes(item[props.itemKey]);
 }
@@ -283,10 +282,12 @@ function updateSort(newSort: Sort) {
 					<slot name="header-context-menu" v-bind="{ header }" />
 				</template>
 			</table-header>
-			<thead v-if="loading" class="loading-indicator" :class="{ sticky: fixedHeader }">
-				<th scope="colgroup" :style="{ gridColumn: fullColSpan }">
-					<v-progress-linear v-if="loading" indeterminate />
-				</th>
+			<thead v-if="loading" :class="{ sticky: fixedHeader }">
+				<tr class="loading-indicator">
+					<th scope="colgroup" :style="{ gridColumn: fullColSpan }">
+						<v-progress-linear v-if="loading" indeterminate />
+					</th>
+				</tr>
 			</thead>
 			<tbody v-if="loading && items.length === 0">
 				<tr class="loading-text">
@@ -301,12 +302,12 @@ function updateSort(newSort: Sort) {
 			<draggable
 				v-else
 				v-model="internalItems"
-				force-fallback
 				:item-key="itemKey"
 				tag="tbody"
 				handle=".drag-handle"
 				:disabled="disabled || internalSort.by !== manualSortKey"
 				:set-data="hideDragImage"
+				v-bind="{ 'force-fallback': true }"
 				@end="onSortChange"
 			>
 				<template #item="{ element }">
@@ -383,8 +384,7 @@ table :deep(th) {
 	color: var(--v-table-color, var(--theme--foreground));
 }
 
-table :deep(tr),
-table :deep(.loading-indicator) {
+table :deep(tr) {
 	display: grid;
 	grid-template-columns: var(--grid-columns);
 }

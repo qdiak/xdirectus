@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useRevisions } from '@/composables/use-revisions';
+import { useGroupable } from '@directus/composables';
 import { ContentVersion } from '@directus/types';
 import { abbreviateNumber } from '@directus/utils';
-import { ref, toRefs, watch } from 'vue';
+import { computed, onMounted, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import RevisionsDateGroup from './revisions-date-group.vue';
 import RevisionsDrawer from './revisions-drawer.vue';
@@ -10,24 +11,43 @@ import RevisionsDrawer from './revisions-drawer.vue';
 const props = defineProps<{
 	collection: string;
 	primaryKey: string | number;
-	version: ContentVersion | null;
+	version?: ContentVersion | null;
 }>();
 
 defineEmits(['revert']);
 
 const { t } = useI18n();
 
-const { collection, primaryKey, version } = toRefs(props);
+const title = computed(() => t('revisions'));
 
-const { revisions, revisionsByDate, loading, refresh, revisionsCount, pagesCount, created } = useRevisions(
-	collection,
-	primaryKey,
-	version,
-);
+const { active: open } = useGroupable({
+	value: title.value,
+	group: 'sidebar-detail',
+});
+
+const { collection, primaryKey, version } = toRefs(props);
 
 const modalActive = ref(false);
 const modalCurrentRevision = ref<number | null>(null);
 const page = ref<number>(1);
+
+const {
+	revisions,
+	revisionsByDate,
+	loading,
+	refresh,
+	revisionsCount,
+	pagesCount,
+	created,
+	getRevisions,
+	loadingCount,
+	getRevisionsCount,
+} = useRevisions(collection, primaryKey, version);
+
+onMounted(() => {
+	getRevisionsCount();
+	if (open.value) getRevisions();
+});
 
 watch(
 	() => page.value,
@@ -41,6 +61,10 @@ function openModal(id: number) {
 	modalActive.value = true;
 }
 
+function onToggle(open: boolean) {
+	if (open && revisions.value === null) getRevisions();
+}
+
 defineExpose({
 	refresh,
 });
@@ -48,9 +72,10 @@ defineExpose({
 
 <template>
 	<sidebar-detail
-		:title="t('revisions')"
+		:title
 		icon="change_history"
-		:badge="!loading && revisionsCount > 0 ? abbreviateNumber(revisionsCount) : null"
+		:badge="!loadingCount && revisionsCount > 0 ? abbreviateNumber(revisionsCount) : null"
+		@toggle="onToggle"
 	>
 		<v-progress-linear v-if="!revisions && loading" indeterminate />
 

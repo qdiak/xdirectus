@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import formatTitle from '@directus/format-title';
-import { isEmpty } from 'lodash';
+import { isEmpty, isString } from 'lodash';
 import { computed } from 'vue';
 
 type Choice = {
 	value: string | number;
 	text: string;
+	icon?: string;
+	color?: string;
 	foreground: string | null;
 	background: string | null;
 };
@@ -28,7 +30,7 @@ const items = computed(() => {
 	let items: string[] | number[];
 
 	if (isEmpty(props.value) && isNaN(props.value as number)) items = [];
-	else if (props.type === 'string') items = [props.value as string];
+	else if (props.type === 'string' && isString(props.value)) items = [props.value as string];
 	else if (['integer', 'bigInteger', 'float', 'decimal'].includes(props.type)) items = [props.value as number];
 	else items = props.value as string[];
 
@@ -58,6 +60,8 @@ const items = computed(() => {
 			return {
 				value: item,
 				text: choice.text || itemStringValue,
+				icon: choice.icon,
+				color: choice.color,
 				foreground: choice.foreground || 'var(--theme--foreground)',
 				background: choice.background || 'var(--theme--background-normal)',
 			};
@@ -79,12 +83,20 @@ const items = computed(() => {
 				small
 				disabled
 				label
+				:class="{ 'has-icon': !!item.icon || !!item.color }"
 			>
+				<v-icon v-if="item.icon" :name="item.icon" :color="item.color" left small />
+				<display-color v-else-if="item.color" class="inline-dot" :value="item.color" />
 				{{ item.text }}
 			</v-chip>
 		</template>
 		<template v-else>
-			<display-color v-for="item in items" :key="item.value" v-tooltip="item.text" :value="item.background" />
+			<display-color
+				v-for="item in items"
+				:key="item.value"
+				v-tooltip="item.text"
+				:value="item.color ?? item.background"
+			/>
 		</template>
 	</div>
 </template>
@@ -94,7 +106,21 @@ const items = computed(() => {
 	display: inline-flex;
 }
 
+.has-icon {
+	--v-chip-padding: 0 8px 0 4px;
+}
+
 .v-chip + .v-chip {
 	margin-left: 4px;
+}
+
+.v-icon {
+	flex-shrink: 0;
+	vertical-align: -3px;
+}
+
+.inline-dot {
+	padding: 0 4px;
+	margin-right: 4px;
 }
 </style>

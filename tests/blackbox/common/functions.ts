@@ -1,11 +1,12 @@
-import type { Query } from '@directus/types';
+import type { Permission, Query } from '@directus/types';
 import { omit } from 'lodash-es';
+import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { getUrl, type Env } from './config';
 import vendors, { type Vendor } from './get-dbs-to-test';
 import type { PrimaryKeyType } from './types';
-import { USER } from './variables';
+import { ROLE, USER } from './variables';
 
 export function DisableTestCachingSetup() {
 	beforeEach(async () => {
@@ -27,7 +28,7 @@ export function ClearCaches() {
 
 				// Assert
 				const response = await request(getUrl(vendor))
-					.post(`/utils/cache/clear`)
+					.post(`/utils/cache/clear?system`)
 					.set('Authorization', `Bearer ${USER.TESTS_FLOW.TOKEN}`);
 
 				const response2 = await request(getUrl(vendor))
@@ -48,8 +49,6 @@ export function EnableTestCaching() {
 
 export type OptionsCreateRole = {
 	name: string;
-	appAccessEnabled: boolean;
-	adminAccessEnabled: boolean;
 };
 
 export async function CreateRole(vendor: Vendor, options: OptionsCreateRole) {
@@ -68,7 +67,7 @@ export async function CreateRole(vendor: Vendor, options: OptionsCreateRole) {
 	const response = await request(getUrl(vendor))
 		.post(`/roles`)
 		.set('Authorization', `Bearer ${USER.TESTS_FLOW.TOKEN}`)
-		.send({ name: options.name, app_access: options.appAccessEnabled, admin_access: options.adminAccessEnabled });
+		.send({ name: options.name });
 
 	return response.body.data;
 }
@@ -709,7 +708,89 @@ export async function UpdateItem(vendor: Vendor, options: OptionsUpdateItem) {
 	return response.body.data;
 }
 
+export type OptionsCreatePolicy = {
+	name: string;
+	appAccessEnabled: boolean;
+	adminAccessEnabled: boolean;
+	role?: keyof typeof ROLE;
+};
+
+export async function CreatePolicy(vendor: Vendor, options: OptionsCreatePolicy) {
+	// Action
+	const roleResponse = await request(getUrl(vendor))
+		.get(`/policies`)
+		.query({
+			filter: { name: { _eq: options.name } },
+		})
+		.set('Authorization', `Bearer ${USER.TESTS_FLOW.TOKEN}`);
+
+	if (roleResponse.body.data.length > 0) {
+		return roleResponse.body.data[0];
+	}
+
+	let roleId = options.role;
+
+	if (roleId && roleId in ROLE) {
+		const role = await request(getUrl(vendor))
+			.get('/roles')
+			.query({ filter: { name: { _eq: ROLE[roleId].NAME } } })
+			.set('Authorization', `Bearer ${USER.APP_ACCESS.TOKEN}`);
+
+		roleId = role.body.data[0].id;
+	}
+
+	const response = await request(getUrl(vendor))
+		.post(`/policies`)
+		.set('Authorization', `Bearer ${USER.TESTS_FLOW.TOKEN}`)
+		.send({
+			name: options.name,
+			app_access: options.appAccessEnabled,
+			admin_access: options.adminAccessEnabled,
+			roles: [{ role: roleId }],
+		});
+
+	return response.body.data;
+}
+
+export type OptionsCreatePermission = {
+	role: keyof typeof ROLE;
+	permission: Omit<Partial<Permission>, 'id' | 'role' | 'system'>;
+	policy?: string;
+	policyName?: string;
+};
+
+export async function CreatePermission(vendor: Vendor, options: OptionsCreatePermission) {
+	let policyId = options.policy;
+	let roleId = options.role;
+
+	if (roleId in ROLE) {
+		const role = await request(getUrl(vendor))
+			.get('/roles')
+			.query({ filter: { name: { _eq: ROLE[roleId].NAME } } })
+			.set('Authorization', `Bearer ${USER.APP_ACCESS.TOKEN}`);
+
+		roleId = role.body.data[0].id;
+	}
+
+	if (!policyId) {
+		const policy = await CreatePolicy(vendor, {
+			role: roleId,
+			adminAccessEnabled: false,
+			appAccessEnabled: false,
+			name: options.policyName ? `${options.role}-${options.policyName}` : `${options.role}-${randomUUID()}`,
+		});
+
+		policyId = policy.id;
+	}
+
+	const response = await request(getUrl(vendor))
+		.patch(`/policies/${policyId}`)
+		.set('Authorization', `Bearer ${USER.TESTS_FLOW.TOKEN}`)
+		.send({ permissions: { create: [{ ...options.permission, policy: options.policy }], update: [], delete: [] } });
+
+	return response.body.data;
+}
+
 // TODO
-// export async function CreatePermissions() {}
-// export async function UpdatePermissions() {}
-// export async function DeletePermissions() {}
+// export async function UpdatePermission() {}
+// export async function DeletePermission() {}

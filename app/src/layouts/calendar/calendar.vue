@@ -1,22 +1,32 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { ShowSelect } from '@directus/extensions';
 
 import '@fullcalendar/core';
 
-const { n, t } = useI18n();
+defineOptions({
+	inheritAttrs: false,
+});
 
 interface Props {
 	createCalendar: (calendarElement: HTMLElement) => void;
 	destroyCalendar: () => void;
 	itemCount?: number;
+	resetPresetAndRefresh: () => Promise<void>;
+	error?: any;
+	selectMode: boolean;
+	showSelect: ShowSelect;
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	itemCount: undefined,
+	showSelect: 'none',
 });
 
 defineEmits(['update:selection']);
+
+const { n, t } = useI18n();
 
 const calendarElement = ref<HTMLElement>();
 
@@ -31,19 +41,13 @@ onUnmounted(() => {
 const atLimit = computed(() => props.itemCount === 10000);
 </script>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-export default defineComponent({
-	inheritAttrs: false,
-});
-</script>
-
 <template>
-	<div class="calendar-layout">
+	<div class="calendar-layout" :class="{ 'select-mode': selectMode, 'select-one': showSelect === 'one' }">
 		<v-notice v-if="atLimit" type="warning">
 			{{ t('dataset_too_large_currently_showing_n_items', { n: n(10000) }) }}
 		</v-notice>
-		<div ref="calendarElement" />
+		<div v-if="!error" ref="calendarElement" />
+		<slot v-else name="error" :error="error" :reset="resetPresetAndRefresh" />
 	</div>
 </template>
 

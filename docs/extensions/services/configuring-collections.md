@@ -46,7 +46,7 @@ router.post('/', async (req, res) => {
 
   const data = await collectionsService.readOne(collectionKey);
 
-  res.json(record);
+  res.json(data);
 });
 ```
 
@@ -146,7 +146,7 @@ router.post('/', async (req, res) => {
     field.field,
   );
 
-  res.json(createdField);
+  res.json(data);
 });
 ```
 
@@ -189,7 +189,7 @@ router.patch('/', async (req, res) => {
     'field_name',
   );
 
-  res.json(updatedField);
+  res.json(data);
 });
 ```
 
@@ -251,7 +251,7 @@ router.post('/', async (req, res) => {
 
   const data = await relationsService.readOne(data);
 
-  res.json(record);
+  res.json(data);
 });
 ```
 
@@ -311,7 +311,7 @@ router.delete('/', async (req, res) => {
 });
 ```
 
-::: tip Explore Services In-depth
+::: tip Explore Services In-Depth
 
 Refer to the full list of methods [in our codebase](https://github.com/directus/directus/blob/main/api/src/services).
 

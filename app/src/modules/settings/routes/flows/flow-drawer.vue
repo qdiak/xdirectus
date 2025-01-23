@@ -16,6 +16,8 @@ interface Values {
 	accountability: string | null;
 	trigger?: TriggerType | null;
 	options: Record<string, any>;
+	simple_request?: boolean | null;
+	simple_request_options: any | null;
 }
 
 const props = withDefaults(
@@ -46,6 +48,7 @@ const values: Values = reactive({
 	accountability: 'all',
 	trigger: undefined,
 	options: {},
+	simple_request_options: {},
 });
 
 watch(
@@ -73,6 +76,12 @@ watch(
 			values.accountability = existing.accountability;
 			values.trigger = existing.trigger;
 			values.options = existing.options ?? {};
+
+			try {
+				values.simple_request_options = JSON.parse((existing as any).simple_request_options || "{}");
+			} catch (err) {
+				values.simple_request_options = {};
+			}
 		}
 	},
 	{ immediate: true },
@@ -112,19 +121,40 @@ const currentTriggerOptionFields = computed(() => {
 	return currentTrigger.value.options;
 });
 
+const simpleRequestOptions = [
+	{
+		field: 'options',
+		name: 'options',
+		type: 'text',
+		meta: {
+			width: 'full',
+			interface: 'input-multiline',
+			options: {
+				font: 'monospace',
+				placeholder: '{ url: string, method: string, body: any, headers?: { header: string, value: string }[] }',
+			},
+		},
+	},
+];
+
 const saving = ref(false);
 
 async function save() {
 	saving.value = true;
 
+	const postData = {
+		...values,
+		simple_request_options: JSON.stringify(values.simple_request_options)
+	};
+
 	try {
 		let id: string;
 
 		if (isNew.value) {
-			id = await api.post('/flows', values, { params: { fields: ['id'] } }).then((res) => res.data.data.id);
+			id = await api.post('/flows', postData, { params: { fields: ['id'] } }).then((res) => res.data.data.id);
 		} else {
 			id = await api
-				.patch(`/flows/${props.primaryKey}`, values, { params: { fields: ['id'] } })
+				.patch(`/flows/${props.primaryKey}`, postData, { params: { fields: ['id'] } })
 				.then((res) => res.data.data.id);
 		}
 
@@ -217,6 +247,19 @@ async function save() {
 							]"
 						/>
 					</div>
+					<v-divider class="full" />
+					<div class="field full">
+						<div class="type-label">Simple API Request</div>
+						<v-checkbox v-model="values.simple_request" block label="Simple API Request"></v-checkbox>
+					</div>
+					<div class="field full">
+						<v-form
+							v-if="values.simple_request"
+							v-model="values.simple_request_options"
+							class="extension-options"
+							:fields="simpleRequestOptions"
+						/>
+					</div>
 				</div>
 			</v-tab-item>
 			<v-tab-item value="trigger_setup">
@@ -260,10 +303,10 @@ async function save() {
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/mixins/form-grid';
+@use '@/styles/mixins';
 
 .fields {
-	@include form-grid;
+	@include mixins.form-grid;
 }
 
 .v-icon.required {

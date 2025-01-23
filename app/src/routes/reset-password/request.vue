@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import api, { RequestError } from '@/api';
 import { translateAPIError } from '@/lang';
+import { useHead } from '@unhead/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -29,6 +30,7 @@ async function onSubmit() {
 	try {
 		await api.post(`/auth/password/request`, {
 			email: email.value,
+			subject: t('password_reset'),
 		});
 
 		done.value = true;
@@ -38,6 +40,10 @@ async function onSubmit() {
 		sending.value = false;
 	}
 }
+
+useHead({
+	title: t('reset_password'),
+});
 </script>
 
 <template>

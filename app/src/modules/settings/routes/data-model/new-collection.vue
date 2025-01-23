@@ -197,14 +197,17 @@ function getSystemFields() {
 						{
 							text: '$t:published',
 							value: 'published',
+							color: 'var(--theme--primary)',
 						},
 						{
 							text: '$t:draft',
 							value: 'draft',
+							color: 'var(--theme--foreground)',
 						},
 						{
 							text: '$t:archived',
 							value: 'archived',
+							color: 'var(--theme--warning)',
 						},
 					],
 				},
@@ -216,20 +219,23 @@ function getSystemFields() {
 						{
 							text: '$t:published',
 							value: 'published',
-							foreground: '#FFFFFF',
-							background: 'var(--theme--primary)',
+							color: 'var(--theme--primary)',
+							foreground: 'var(--theme--primary)',
+							background: 'var(--theme--primary-background)',
 						},
 						{
 							text: '$t:draft',
 							value: 'draft',
-							foreground: '#18222F',
-							background: '#D3DAE4',
+							color: 'var(--theme--foreground)',
+							foreground: 'var(--theme--foreground)',
+							background: 'var(--theme--background-normal)',
 						},
 						{
 							text: '$t:archived',
 							value: 'archived',
-							foreground: '#FFFFFF',
-							background: 'var(--theme--warning)',
+							color: 'var(--theme--warning)',
+							foreground: 'var(--theme--warning)',
+							background: 'var(--theme--warning-background)',
 						},
 					],
 				},
@@ -268,7 +274,7 @@ function getSystemFields() {
 				special: ['user-created'],
 				interface: 'select-dropdown-m2o',
 				options: {
-					template: '{{avatar.$thumbnail}} {{first_name}} {{last_name}}',
+					template: '{{avatar}} {{first_name}} {{last_name}}',
 				},
 				display: 'user',
 				readonly: true,
@@ -306,7 +312,7 @@ function getSystemFields() {
 				special: ['user-updated'],
 				interface: 'select-dropdown-m2o',
 				options: {
-					template: '{{avatar.$thumbnail}} {{first_name}} {{last_name}}',
+					template: '{{avatar}} {{first_name}} {{last_name}}',
 				},
 				display: 'user',
 				readonly: true,
@@ -494,14 +500,14 @@ function getSystemRelations() {
 </template>
 
 <style lang="scss" scoped>
-@import '@/styles/mixins/form-grid';
+@use '@/styles/mixins';
 
 .type-title {
 	margin-bottom: 48px;
 }
 
 .grid {
-	@include form-grid;
+	@include mixins.form-grid;
 }
 
 .system :deep(.v-input .input) {

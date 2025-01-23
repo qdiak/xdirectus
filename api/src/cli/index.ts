@@ -1,7 +1,7 @@
 import { Command, Option } from 'commander';
+import { version } from 'quantum_directus/version';
 import emitter from '../emitter.js';
 import { startServer } from '../server.js';
-import * as pkg from '../utils/package.js';
 import bootstrap from './commands/bootstrap/index.js';
 import count from './commands/count/index.js';
 import dbInstall from './commands/database/install.js';
@@ -24,7 +24,7 @@ export async function createCli(): Promise<Command> {
 	await emitter.emitInit('cli.before', { program });
 
 	program.name('directus').usage('[command] [options]');
-	program.version(pkg.version, '-v, --version');
+	program.version(version, '-v, --version');
 
 	program.command('start').description('Start the Directus API').action(startServer);
 	program.command('init').description('Create a new Directus Project').action(init);
@@ -76,6 +76,7 @@ export async function createCli(): Promise<Command> {
 		.description('Create a new role')
 		.option('--role <value>', `name for the role`)
 		.option('--admin', `whether or not the role has admin access`)
+		.option('--app', `whether or not the role has app access`)
 		.action(rolesCreate);
 
 	program.command('count <collection>').description('Count the amount of items in a given collection').action(count);
@@ -101,6 +102,10 @@ export async function createCli(): Promise<Command> {
 		.description('Apply a snapshot file to the current database')
 		.option('-y, --yes', `Assume "yes" as answer to all prompts and run non-interactively`)
 		.option('-d, --dry-run', 'Plan and log changes to be applied', false)
+		.option(
+			'--ignoreRules <value>',
+			`Comma-separated list of collections and or fields to ignore. Format: "products.title,reviews" this will ignore applying changes to the title field in the products collection and the entire reviews collection`,
+		)
 		.argument('<path>', 'Path to snapshot file')
 		.action(apply);
 

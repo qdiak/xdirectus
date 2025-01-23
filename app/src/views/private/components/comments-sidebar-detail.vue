@@ -1,98 +1,128 @@
 <script setup lang="ts">
 import api from '@/api';
-import { Activity, ActivityByDate } from '@/types/activity';
 import { localizedFormat } from '@/utils/localized-format';
 import { userName } from '@/utils/user-name';
-import type { User } from '@directus/types';
+import { useGroupable } from '@directus/composables';
+import type { Comment, PrimaryKey, User } from '@directus/types';
+import { abbreviateNumber } from '@directus/utils';
 import { isThisYear, isToday, isYesterday } from 'date-fns';
 import { flatten, groupBy, orderBy } from 'lodash';
-import { ref } from 'vue';
+import { Ref, computed, onMounted, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import dompurify from 'dompurify';
 import CommentInput from './comment-input.vue';
 import CommentItem from './comment-item.vue';
 
-type ActivityByDateDisplay = ActivityByDate & {
-	activity: (Activity & {
+type CommentsByDateDisplay = {
+	date: Date;
+	dateFormatted: string;
+	comments: (Comment & {
 		display: string;
-		user: Pick<User, 'id' | 'email' | 'first_name' | 'last_name' | 'avatar'>;
+		user_created: Pick<User, 'id' | 'email' | 'first_name' | 'last_name' | 'avatar'>;
 	})[];
 };
 
 const props = defineProps<{
 	collection: string;
-	primaryKey: string | number;
+	primaryKey: PrimaryKey;
 }>();
 
 const { t } = useI18n();
 
-const { activity, loading, refresh, count, userPreviews } = useActivity(props.collection, props.primaryKey);
+const title = computed(() => t('comments'));
 
-function useActivity(collection: string, primaryKey: string | number) {
+const { active: open } = useGroupable({
+	value: title.value,
+	group: 'sidebar-detail',
+});
+
+const { collection, primaryKey } = toRefs(props);
+
+const { comments, getComments, loading, refresh, commentsCount, getCommentsCount, loadingCount, userPreviews } =
+	useComments(collection, primaryKey);
+
+onMounted(() => {
+	getCommentsCount();
+	if (open.value) getActivity();
+});
+
+function onToggle(open: boolean) {
+	if (open && comments.value === null) getComments();
+}
+
+function useComments(collection: Ref<string>, primaryKey: Ref<PrimaryKey>) {
 	const regex = /\s@[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}/gm;
-	const activity = ref<ActivityByDateDisplay[] | null>(null);
-	const count = ref(0);
+	const comments = ref<CommentsByDateDisplay[] | null>(null);
+	const commentsCount = ref(0);
 	const error = ref(null);
 	const loading = ref(false);
+	const loadingCount = ref(false);
 	const userPreviews = ref<Record<string, any>>({});
 
-	getActivity();
+	watch([collection, primaryKey], () => refresh());
 
-	return { activity, error, loading, refresh, count, userPreviews };
+	return {
+		comments,
+		getComments,
+		error,
+		loading,
+		refresh,
+		commentsCount,
+		getCommentsCount,
+		loadingCount,
+		userPreviews,
+	};
 
-	async function getActivity() {
+	async function getComments() {
 		error.value = null;
 		loading.value = true;
 
 		try {
-			const response = await api.get(`/activity`, {
-				params: {
-					'filter[collection][_eq]': collection,
-					'filter[item][_eq]': primaryKey,
-					'filter[action][_eq]': 'comment',
-					sort: '-id', // directus_activity has auto increment and is therefore in chronological order
-					fields: [
-						'id',
-						'action',
-						'timestamp',
-						'user.id',
-						'user.email',
-						'user.first_name',
-						'user.last_name',
-						'user.avatar.id',
-						'revisions.id',
-						'comment',
-					],
-				},
-			});
+			const response = (
+				await api.get(`/comments`, {
+					params: {
+						'filter[collection][_eq]': collection.value,
+						'filter[item][_eq]': primaryKey.value,
+						sort: '-date_created',
+						fields: [
+							'id',
+							'comment',
+							'date_created',
+							'user_created.id',
+							'user_created.email',
+							'user_created.first_name',
+							'user_created.last_name',
+							'user_created.avatar.id',
+						],
+					},
+				})
+			).data.data as Comment[];
 
-			count.value = response.data.data.length;
+			userPreviews.value = await loadUserPreviews(response, regex);
 
-			userPreviews.value = await loadUserPreviews(response.data.data, regex);
-
-			const activityWithUsersInComments = (response.data.data as Activity[]).map((comment) => {
-				const display = (comment.comment as string).replace(
-					regex,
-					(match) => `<mark>${userPreviews.value[match.substring(2)]}</mark>`,
-				);
+			const commentsWithTaggedUsers = (response as Comment[]).map((comment) => {
+				const display = dompurify
+					.sanitize(comment.comment as string, { ALLOWED_TAGS: [] })
+					.replace(regex, (match) => `<mark>${userPreviews.value[match.substring(2)]}</mark>`);
 
 				return {
 					...comment,
 					display,
-				} as Activity & {
+				} as Comment & {
 					display: string;
-					user: Pick<User, 'id' | 'email' | 'first_name' | 'last_name' | 'avatar'>;
+					user_created: Pick<User, 'id' | 'email' | 'first_name' | 'last_name' | 'avatar'>;
 				};
 			});
 
-			const activityByDate = groupBy(activityWithUsersInComments, (activity) => {
+			const commentsByDate = groupBy(commentsWithTaggedUsers, (activity) => {
 				// activity's timestamp date is in iso-8601
-				const date = new Date(new Date(activity.timestamp).toDateString());
+				const date = new Date(new Date(activity.date_created).toDateString());
 				return date;
 			});
 
-			const activityGrouped: ActivityByDateDisplay[] = [];
+			const commentsGrouped: CommentsByDateDisplay[] = [];
 
-			for (const [key, value] of Object.entries(activityByDate)) {
+			for (const [key, value] of Object.entries(commentsByDate)) {
 				const date = new Date(key);
 				const today = isToday(date);
 				const yesterday = isYesterday(date);
@@ -105,14 +135,14 @@ function useActivity(collection: string, primaryKey: string | number) {
 				else if (thisYear) dateFormatted = localizedFormat(date, String(t('date-fns_date_short_no_year')));
 				else dateFormatted = localizedFormat(date, String(t('date-fns_date_short')));
 
-				activityGrouped.push({
+				commentsGrouped.push({
 					date: date,
 					dateFormatted: String(dateFormatted),
-					activity: value,
+					comments: value,
 				});
 			}
 
-			activity.value = orderBy(activityGrouped, ['date'], ['desc']);
+			comments.value = orderBy(commentsGrouped, ['date'], ['desc']);
 		} catch (error: any) {
 			error.value = error;
 		} finally {
@@ -120,12 +150,48 @@ function useActivity(collection: string, primaryKey: string | number) {
 		}
 	}
 
+	async function getCommentsCount() {
+		error.value = null;
+		loadingCount.value = true;
+
+		try {
+			const response = await api.get(`/comments`, {
+				params: {
+					filter: {
+						_and: [
+							{
+								collection: {
+									_eq: collection.value,
+								},
+							},
+							{
+								item: {
+									_eq: primaryKey.value,
+								},
+							},
+						],
+					},
+					aggregate: {
+						count: 'id',
+					},
+				},
+			});
+
+			commentsCount.value = Number(response.data.data[0].count.id);
+		} catch (error: any) {
+			error.value = error;
+		} finally {
+			loadingCount.value = false;
+		}
+	}
+
 	async function refresh() {
-		await getActivity();
+		await getCommentsCount();
+		await getComments();
 	}
 }
 
-async function loadUserPreviews(comments: Record<string, any>, regex: RegExp) {
+async function loadUserPreviews(comments: Comment[], regex: RegExp) {
 	const userPreviews: any[] = [];
 
 	comments.forEach((comment: Record<string, any>) => {
@@ -158,22 +224,27 @@ async function loadUserPreviews(comments: Record<string, any>, regex: RegExp) {
 </script>
 
 <template>
-	<sidebar-detail :title="t('comments')" icon="chat_bubble_outline" :badge="count || null">
+	<sidebar-detail
+		:title
+		icon="chat_bubble_outline"
+		:badge="!loadingCount && commentsCount > 0 ? abbreviateNumber(commentsCount) : null"
+		@toggle="onToggle"
+	>
 		<comment-input :refresh="refresh" :collection="collection" :primary-key="primaryKey" />
 
 		<v-progress-linear v-if="loading" indeterminate />
 
-		<div v-else-if="!activity || activity.length === 0" class="empty">
+		<div v-else-if="!comments || comments.length === 0" class="empty">
 			<div class="content">{{ t('no_comments') }}</div>
 		</div>
 
-		<template v-for="group in activity" v-else :key="group.date.toString()">
+		<template v-for="group in comments" v-else :key="group.date.toString()">
 			<v-divider>{{ group.dateFormatted }}</v-divider>
 
-			<template v-for="item in group.activity" :key="item.id">
+			<template v-for="item in group.comments" :key="item.id">
 				<comment-item
 					:refresh="refresh"
-					:activity="item"
+					:comment="item"
 					:user-previews="userPreviews"
 					:primary-key="primaryKey"
 					:collection="collection"
